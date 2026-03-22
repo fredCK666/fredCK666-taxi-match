@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>二胡小教室 | 入門小測驗</title>
+  <style>
+    :root { --ink:#211914; --muted:#69584d; --paper:rgba(255,250,244,0.92); --line:rgba(83,57,39,0.12); --wood:#7b4d2d; --shadow:0 22px 54px rgba(46,28,18,0.14); }
+    * { box-sizing:border-box; }
+    body { margin:0; color:var(--ink); font-family:"Noto Sans TC","PingFang TC","Microsoft JhengHei",sans-serif; background:linear-gradient(180deg,#f7efe3 0%,#fbf9f5 40%,#efe4d5 100%); }
+    a { color:inherit; text-decoration:none; }
+    .shell { width:min(1120px,calc(100% - 28px)); margin:0 auto; padding:24px 0 40px; }
+    .topbar { display:flex; justify-content:space-between; gap:16px; margin-bottom:18px; flex-wrap:wrap; }
+    .brand { font-size:22px; font-weight:800; letter-spacing:0.08em; }
+    .nav { display:flex; gap:14px; flex-wrap:wrap; color:var(--muted); font-weight:700; }
+    .hero,.panel { background:var(--paper); border:1px solid var(--line); border-radius:28px; box-shadow:var(--shadow); }
+    .hero { padding:28px; margin-bottom:18px; }
+    h1 { margin:0 0 10px; font-size:clamp(30px,5vw,46px); }
+    .hero p,.panel p { color:var(--muted); line-height:1.8; }
+    .quiz-grid { display:grid; gap:14px; }
+    .question { padding:18px; border-radius:20px; border:1px solid var(--line); background:#fffdf8; }
+    .options { display:grid; gap:10px; margin-top:12px; }
+    .option { display:flex; gap:10px; align-items:start; padding:12px 14px; border-radius:14px; border:1px solid var(--line); background:rgba(255,255,255,0.78); }
+    .controls { display:flex; gap:12px; flex-wrap:wrap; margin-top:16px; }
+    .button { display:inline-flex; align-items:center; justify-content:center; padding:12px 16px; border:0; border-radius:999px; background:linear-gradient(135deg,#efc06f,#ca8531); color:#4d2f15; font-weight:800; cursor:pointer; }
+    .button.secondary { background:rgba(123,77,45,0.1); color:var(--wood); }
+    .result { margin-top:14px; color:var(--wood); font-weight:800; }
+  </style>
+</head>
+<body>
+  <main class="shell">
+    <header class="topbar">
+      <div class="brand">二胡小教室</div>
+      <nav class="nav">
+        <a href="./erhu/">回首頁</a>
+        <a href="./二胡小教室.html">課程入口</a>
+        <a href="./二胡小教室-章節.html">章節教學</a>
+        <a href="./二胡小教室-影片.html">影片音檔</a>
+        <a href="./二胡小教室-練習打卡.html">練習打卡</a>
+      </nav>
+    </header>
+    <section class="hero">
+      <h1>入門小測驗</h1>
+      <p>做完後會立即顯示分數，幫你確認有沒有掌握基本觀念。</p>
+    </section>
+    <section class="panel" style="padding:24px;">
+      <div class="quiz-grid" id="quizContainer"></div>
+      <div class="controls">
+        <button class="button" id="submitQuizButton" type="button">送出測驗</button>
+        <button class="button secondary" id="resetQuizButton" type="button">重新作答</button>
+      </div>
+      <div class="result" id="quizResult">尚未作答</div>
+    </section>
+  <script>
+    const quizQuestions = [
+      { id:"q1", question:"初學二胡時，最應該先穩定的是哪一項？", options:["追求速度","姿勢與運弓","一次學很多曲子"], answer:1 },
+      { id:"q2", question:"二胡聲音太尖太乾，最常見的原因是什麼？", options:["手太放鬆","弓壓太重或手太緊","音階練太少"], answer:1 },
+      { id:"q3", question:"為什麼二胡的音準要特別靠耳朵訓練？", options:["因為二胡沒有固定品格","因為二胡不能按音","因為節奏比音準重要"], answer:0 }
+    ];
+    const quizContainer = document.getElementById("quizContainer");
+    const quizResult = document.getElementById("quizResult");
+    quizQuestions.forEach((item, index) => {
+      const wrapper = document.createElement("div");
+      wrapper.className = "question";
+      wrapper.innerHTML = "<p><strong>第 " + (index + 1) + " 題</strong><br>" + item.question + "</p>";
+      const options = document.createElement("div");
+      options.className = "options";
+      item.options.forEach((option, optionIndex) => {
+        const label = document.createElement("label");
+        label.className = "option";
+        label.innerHTML = "<input type=\"radio\" name=\"" + item.id + "\" value=\"" + optionIndex + "\"><span>" + option + "</span>";
+        options.appendChild(label);
+      });
+      wrapper.appendChild(options);
+      quizContainer.appendChild(wrapper);
+    });
+    document.getElementById("submitQuizButton").addEventListener("click", () => {
+      let score = 0;
+      let answered = 0;
+      quizQuestions.forEach((item) => {
+        const checked = document.querySelector("input[name=\"" + item.id + "\"]:checked");
+        if (checked) {
+          answered += 1;
+          if (Number(checked.value) === item.answer) score += 1;
+        }
+      });
+      if (answered < quizQuestions.length) {
+        quizResult.textContent = "你還有題目沒作答，先全部選完再送出。";
+        return;
+      }
+      quizResult.textContent = "你的分數是 " + score + " / " + quizQuestions.length + "。"
+        + (score === quizQuestions.length ? " 全對，基本觀念已經掌握。" : " 建議回去複習章節教學。");
+    });
+    document.getElementById("resetQuizButton").addEventListener("click", () => {
+      document.querySelectorAll("input[type=\"radio\"]").forEach((input) => { input.checked = false; });
+      quizResult.textContent = "尚未作答";
+    });
+  </script>
+  </main>
+</body>
+</html>

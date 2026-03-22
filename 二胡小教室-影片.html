@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>二胡小教室 | 分級影片與音檔</title>
+  <style>
+    :root { --ink:#211914; --muted:#69584d; --paper:rgba(255,250,244,0.92); --line:rgba(83,57,39,0.12); --wood:#7b4d2d; --shadow:0 22px 54px rgba(46,28,18,0.14); }
+    * { box-sizing:border-box; }
+    body { margin:0; color:var(--ink); font-family:"Noto Sans TC","PingFang TC","Microsoft JhengHei",sans-serif; background:linear-gradient(180deg,#f7efe3 0%,#fbf9f5 40%,#efe4d5 100%); }
+    a { color:inherit; text-decoration:none; }
+    .shell { width:min(1120px,calc(100% - 28px)); margin:0 auto; padding:24px 0 40px; }
+    .topbar { display:flex; justify-content:space-between; gap:16px; margin-bottom:18px; flex-wrap:wrap; }
+    .brand { font-size:22px; font-weight:800; letter-spacing:0.08em; }
+    .nav { display:flex; gap:14px; flex-wrap:wrap; color:var(--muted); font-weight:700; }
+    .hero,.panel { background:var(--paper); border:1px solid var(--line); border-radius:28px; box-shadow:var(--shadow); }
+    .hero { padding:28px; margin-bottom:18px; }
+    h1 { margin:0 0 10px; font-size:clamp(30px,5vw,46px); }
+    .hero p,.panel p { color:var(--muted); line-height:1.8; }
+    .tabs { display:flex; gap:12px; flex-wrap:wrap; margin:18px 0 0; }
+    .tab {
+      padding:12px 20px;
+      border-radius:999px;
+      border:1px solid var(--line);
+      background:#fffdf8;
+      color:var(--wood);
+      font-weight:800;
+      font-size:20px;
+      line-height:1.2;
+      cursor:pointer;
+    }
+    .tab.active { background:linear-gradient(135deg,#efc06f,#ca8531); color:#4d2f15; border-color:transparent; }
+    .layout { display:grid; grid-template-columns:minmax(0,1.1fr) minmax(0,0.9fr); gap:18px; }
+    .video-player { overflow:hidden; border-radius:20px; background:#18120f; aspect-ratio:16 / 9; }
+    .video-player iframe { width:100%; height:100%; border:0; }
+    .playlist { display:grid; gap:12px; }
+    .playlist-item { padding:18px; border-radius:18px; border:1px solid var(--line); background:#fffdf8; cursor:pointer; text-align:left; }
+    .playlist-item.active { border-color:rgba(123,77,45,0.5); }
+    .playlist-item small { display:block; margin-bottom:8px; color:var(--wood); font-weight:800; font-size:14px; }
+    .playlist-item strong { display:block; margin-bottom:6px; font-size:22px; line-height:1.35; }
+    .playlist-item div { font-size:16px; line-height:1.7; color:var(--muted); }
+    .controls { display:flex; gap:12px; flex-wrap:wrap; align-items:center; margin-top:16px; }
+    .button { display:inline-flex; align-items:center; justify-content:center; padding:12px 16px; border:0; border-radius:999px; background:linear-gradient(135deg,#efc06f,#ca8531); color:#4d2f15; font-weight:800; cursor:pointer; }
+    .button.secondary { background:rgba(123,77,45,0.1); color:var(--wood); }
+    .status { color:var(--muted); font-weight:700; }
+    @media (max-width:860px) { .layout { grid-template-columns:1fr; } }
+  </style>
+</head>
+<body>
+  <main class="shell">
+    <header class="topbar">
+      <div class="brand">二胡小教室</div>
+      <nav class="nav">
+        <a href="./erhu/">回首頁</a>
+        <a href="./二胡小教室.html">課程分級</a>
+        <a href="./二胡小教室-練習打卡.html">每週打卡</a>
+        <a href="./二胡小教室-小測驗.html">小測驗</a>
+      </nav>
+    </header>
+    <section class="hero">
+      <h1>分級影片與音檔</h1>
+      <div class="tabs" id="levelTabs"></div>
+    </section>
+    <section class="panel" style="padding:24px;">
+      <div class="layout">
+        <div>
+          <div class="video-player">
+            <iframe id="videoFrame" src="https://www.youtube.com/embed/Mc7fJ2C1Qf8?rel=0" title="二胡教學影片" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+          </div>
+          <h2 id="videoTitle"></h2>
+          <div class="controls">
+            <button class="button" id="playAudioButton" type="button">播放音檔</button>
+            <button class="button secondary" id="pauseAudioButton" type="button">暫停</button>
+            <select id="audioSelect"></select>
+            <span class="status" id="audioStatus">尚未播放</span>
+          </div>
+          <audio id="practiceAudio" preload="metadata"></audio>
+        </div>
+        <div class="playlist" id="videoPlaylist"></div>
+      </div>
+    </section>
+  <script>
+    const courseData = {
+      beginner: {
+        label: "初級",
+        videos: [
+          { id:"Mc7fJ2C1Qf8", title:"第 1 週：姿勢與持琴重整", description:"初級占位影片。之後替換為你的第 1 週正式影片。", note:"基礎動作與坐姿。" },
+          { id:"LfLqOT0SxwA", title:"第 2 週：基本長弓穩定", description:"初級占位影片。之後替換為你的第 2 週正式影片。", note:"長弓與弓速平均。" },
+          { id:"xQom8S0v6FQ", title:"第 3 週：內外弦切換", description:"初級占位影片。之後替換為你的第 3 週正式影片。", note:"切弦與弓路乾淨。" },
+          { id:"Mc7fJ2C1Qf8", title:"第 4 週：節奏與短句", description:"初級占位影片。", note:"拍器與短句。" },
+          { id:"LfLqOT0SxwA", title:"第 5 週：左手按音基礎", description:"初級占位影片。", note:"加入按音。" },
+          { id:"xQom8S0v6FQ", title:"第 6 週：音階反覆校正", description:"初級占位影片。", note:"音準建立。" },
+          { id:"Mc7fJ2C1Qf8", title:"第 7 週：分弓與連弓", description:"初級占位影片。", note:"弓法基本型。" },
+          { id:"LfLqOT0SxwA", title:"第 8 週：基礎旋律整合", description:"初級占位影片。", note:"旋律串接。" },
+          { id:"xQom8S0v6FQ", title:"第 9 週：完整段落演奏", description:"初級占位影片。", note:"不中斷演奏。" },
+          { id:"Mc7fJ2C1Qf8", title:"第 10 週：初級成果驗收", description:"初級占位影片。", note:"錄影驗收。" }
+        ],
+        audio: {
+          "base-1": { label:"初級第 1-3 週音檔", src:"https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" },
+          "base-2": { label:"初級第 4-7 週音檔", src:"https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3" },
+          "base-3": { label:"初級第 8-10 週音檔", src:"https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3" }
+        }
+      },
+      intermediate: {
+        label: "中級",
+        videos: [
+          { id:"LfLqOT0SxwA", title:"第 1 週：換把定位重整", description:"中級占位影片。", note:"換把準確度。" },
+          { id:"xQom8S0v6FQ", title:"第 2 週：揉弦穩定起步", description:"中級占位影片。", note:"揉弦基礎。" },
+          { id:"Mc7fJ2C1Qf8", title:"第 3 週：音色控制訓練", description:"中級占位影片。", note:"力度與音色。" },
+          { id:"LfLqOT0SxwA", title:"第 4 週：弓法組合進階", description:"中級占位影片。", note:"複合弓法。" },
+          { id:"xQom8S0v6FQ", title:"第 5 週：中速節奏穩定", description:"中級占位影片。", note:"中速穩定。" },
+          { id:"Mc7fJ2C1Qf8", title:"第 6 週：段落與換氣感", description:"中級占位影片。", note:"句子方向。" },
+          { id:"LfLqOT0SxwA", title:"第 7 週：耐力與不中斷演奏", description:"中級占位影片。", note:"耐力。" },
+          { id:"xQom8S0v6FQ", title:"第 8 週：速度提升訓練", description:"中級占位影片。", note:"提速。" },
+          { id:"Mc7fJ2C1Qf8", title:"第 9 週：技巧整合到曲目", description:"中級占位影片。", note:"整合。" },
+          { id:"LfLqOT0SxwA", title:"第 10 週：中級成果錄影", description:"中級占位影片。", note:"錄影成果。" }
+        ],
+        audio: {
+          "mid-1": { label:"中級第 1-3 週音檔", src:"https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" },
+          "mid-2": { label:"中級第 4-7 週音檔", src:"https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3" },
+          "mid-3": { label:"中級第 8-10 週音檔", src:"https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3" }
+        }
+      },
+      advanced: {
+        label: "高級",
+        videos: [
+          { id:"xQom8S0v6FQ", title:"第 1 週：高強度長弓控制", description:"高級占位影片。", note:"長弓統一性。" },
+          { id:"Mc7fJ2C1Qf8", title:"第 2 週：快速換把與定位", description:"高級占位影片。", note:"高速準確。" },
+          { id:"LfLqOT0SxwA", title:"第 3 週：複合弓法連接", description:"高級占位影片。", note:"複雜弓法。" },
+          { id:"xQom8S0v6FQ", title:"第 4 週：揉弦與表情深化", description:"高級占位影片。", note:"表情深化。" },
+          { id:"Mc7fJ2C1Qf8", title:"第 5 週：高速度節奏穩定", description:"高級占位影片。", note:"高速節奏。" },
+          { id:"LfLqOT0SxwA", title:"第 6 週：段落推進與層次", description:"高級占位影片。", note:"層次與推進。" },
+          { id:"xQom8S0v6FQ", title:"第 7 週：困難段拆解修正", description:"高級占位影片。", note:"難段修正。" },
+          { id:"Mc7fJ2C1Qf8", title:"第 8 週：整首曲目連續演奏", description:"高級占位影片。", note:"完整曲目。" },
+          { id:"LfLqOT0SxwA", title:"第 9 週：錄影回看與舞台修正", description:"高級占位影片。", note:"舞台完整度。" },
+          { id:"xQom8S0v6FQ", title:"第 10 週：高級總驗收", description:"高級占位影片。", note:"正式錄影。" }
+        ],
+        audio: {
+          "adv-1": { label:"高級第 1-3 週音檔", src:"https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" },
+          "adv-2": { label:"高級第 4-7 週音檔", src:"https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3" },
+          "adv-3": { label:"高級第 8-10 週音檔", src:"https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3" }
+        }
+      }
+    };
+
+    let currentLevel = "beginner";
+    const levelTabs = document.getElementById("levelTabs");
+    const videoPlaylist = document.getElementById("videoPlaylist");
+    const videoFrame = document.getElementById("videoFrame");
+    const videoTitle = document.getElementById("videoTitle");
+    const practiceAudio = document.getElementById("practiceAudio");
+    const audioSelect = document.getElementById("audioSelect");
+    const audioStatus = document.getElementById("audioStatus");
+
+    function renderLevelTabs() {
+      levelTabs.innerHTML = "";
+      Object.entries(courseData).forEach(([key, value]) => {
+        const button = document.createElement("button");
+        button.type = "button";
+        button.className = "tab";
+        button.textContent = value.label;
+        button.addEventListener("click", () => setLevel(key));
+        levelTabs.appendChild(button);
+      });
+    }
+
+    function setActiveVideo(videoId) {
+      const current = courseData[currentLevel].videos.find((video) => video.id + video.title === videoId);
+      if (!current) return;
+      document.querySelectorAll(".playlist-item").forEach((item) => item.classList.toggle("active", item.dataset.videoId === videoId));
+      videoFrame.src = "https://www.youtube.com/embed/" + current.id + "?rel=0";
+      videoTitle.textContent = current.title;
+    }
+
+    function renderPlaylist() {
+      videoPlaylist.innerHTML = "";
+      courseData[currentLevel].videos.forEach((video, index) => {
+        const item = document.createElement("button");
+        item.type = "button";
+        item.className = "playlist-item";
+        item.dataset.videoId = video.id + video.title;
+        item.innerHTML = "<small>" + courseData[currentLevel].label + "課程</small><strong>" + video.title + "</strong>";
+        item.addEventListener("click", () => setActiveVideo(video.id + video.title));
+        videoPlaylist.appendChild(item);
+        if (index === 0) setActiveVideo(video.id + video.title);
+      });
+    }
+
+    function renderAudioSelect() {
+      audioSelect.innerHTML = "";
+      Object.entries(courseData[currentLevel].audio).forEach(([key, value], index) => {
+        const option = document.createElement("option");
+        option.value = key;
+        option.textContent = value.label;
+        audioSelect.appendChild(option);
+        if (index === 0) {
+          practiceAudio.src = value.src;
+          audioStatus.textContent = "目前音檔：" + value.label;
+        }
+      });
+    }
+
+    function setLevel(levelKey) {
+      currentLevel = levelKey;
+      document.querySelectorAll(".tab").forEach((tab, index) => {
+        const key = Object.keys(courseData)[index];
+        tab.classList.toggle("active", key === levelKey);
+      });
+      renderPlaylist();
+      renderAudioSelect();
+    }
+
+    audioSelect.addEventListener("change", (event) => {
+      const current = courseData[currentLevel].audio[event.target.value];
+      if (!current) return;
+      practiceAudio.src = current.src;
+      audioStatus.textContent = "目前音檔：" + current.label;
+    });
+
+    document.getElementById("playAudioButton").addEventListener("click", async () => {
+      try {
+        await practiceAudio.play();
+        audioStatus.textContent = "播放中：" + audioSelect.options[audioSelect.selectedIndex].text;
+      } catch (error) {
+        audioStatus.textContent = "播放失敗，可能被瀏覽器限制。";
+      }
+    });
+
+    document.getElementById("pauseAudioButton").addEventListener("click", () => {
+      practiceAudio.pause();
+      audioStatus.textContent = "已暫停：" + audioSelect.options[audioSelect.selectedIndex].text;
+    });
+
+    practiceAudio.addEventListener("ended", () => {
+      audioStatus.textContent = "播放完成：" + audioSelect.options[audioSelect.selectedIndex].text;
+    });
+
+    renderLevelTabs();
+    setLevel("beginner");
+  </script>
+  </main>
+</body>
+</html>

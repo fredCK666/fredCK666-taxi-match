@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>二胡小教室 | 每週課程</title>
+  <style>
+    :root {
+      --ink: #1f1713;
+      --muted: #6b5d52;
+      --wood: #7d4b2b;
+      --gold: #f0ae3e;
+      --paper: rgba(255, 250, 244, 0.96);
+      --line: rgba(114, 75, 41, 0.08);
+      --shadow: 0 24px 56px rgba(61, 39, 24, 0.12);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      color: var(--ink);
+      font-family: "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", sans-serif;
+      background:
+        radial-gradient(circle at top left, rgba(255, 207, 92, 0.34), transparent 22%),
+        linear-gradient(180deg, #fff4dd 0%, #fffdfa 38%, #f3e6d9 100%);
+    }
+
+    a { color: inherit; text-decoration: none; }
+
+    .shell {
+      width: min(1160px, calc(100% - 28px));
+      margin: 0 auto;
+      padding: 24px 0 42px;
+    }
+
+    .topbar {
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 18px;
+      flex-wrap: wrap;
+      color: var(--muted);
+      font-weight: 700;
+    }
+
+    .brand {
+      color: var(--ink);
+      font-size: 22px;
+      font-weight: 900;
+      letter-spacing: 0.08em;
+    }
+
+    .nav {
+      display: flex;
+      gap: 14px;
+      flex-wrap: wrap;
+    }
+
+    .hero,
+    .panel,
+    .score-card {
+      background: var(--paper);
+      border: 1px solid var(--line);
+      border-radius: 28px;
+      box-shadow: var(--shadow);
+    }
+
+    .hero {
+      padding: 28px;
+      margin-bottom: 18px;
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      margin-bottom: 12px;
+      padding: 6px 10px;
+      border-radius: 999px;
+      background: rgba(240, 174, 62, 0.12);
+      color: var(--wood);
+      font-size: 13px;
+      font-weight: 900;
+      letter-spacing: 0.08em;
+    }
+
+    h1 {
+      margin: 0 0 10px;
+      font-size: clamp(30px, 5vw, 46px);
+    }
+
+    p, li {
+      color: var(--muted);
+      line-height: 1.8;
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: minmax(0, 1.08fr) minmax(320px, 0.92fr);
+      gap: 18px;
+    }
+
+    .panel {
+      padding: 24px;
+    }
+
+    .video-frame {
+      overflow: hidden;
+      border-radius: 20px;
+      background: #18120f;
+      aspect-ratio: 16 / 9;
+      margin-bottom: 16px;
+    }
+
+    .video-frame iframe {
+      width: 100%;
+      height: 100%;
+      border: 0;
+    }
+
+    .bullet-list,
+    .task-list {
+      margin: 0;
+      padding-left: 20px;
+    }
+
+    .score-card {
+      padding: 22px;
+    }
+
+    .score-title {
+      margin: 0 0 10px;
+      font-size: 24px;
+    }
+
+    .score-box {
+      margin-top: 12px;
+      padding: 18px;
+      border-radius: 20px;
+      background: linear-gradient(180deg, rgba(255,246,232,0.96), rgba(255,237,211,0.92));
+      border: 1px solid rgba(125, 75, 43, 0.08);
+    }
+
+    .score-box pre {
+      margin: 0;
+      white-space: pre-wrap;
+      word-break: break-word;
+      color: var(--wood);
+      font-size: 18px;
+      line-height: 1.8;
+      font-family: "SFMono-Regular", Consolas, monospace;
+    }
+
+    .score-note {
+      margin-top: 12px;
+      font-size: 14px;
+    }
+
+    .actions {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-top: 18px;
+    }
+
+    .button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 144px;
+      padding: 12px 16px;
+      border-radius: 999px;
+      background: linear-gradient(135deg, #ffd66b, #e7861d);
+      color: #4a2f18;
+      font-weight: 900;
+    }
+
+    .button.secondary {
+      background: rgba(125, 75, 43, 0.08);
+      color: var(--wood);
+    }
+
+    @media (max-width: 920px) {
+      .layout {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="shell">
+    <header class="topbar">
+      <div class="brand">二胡小教室</div>
+      <nav class="nav">
+        <a href="./erhu/">回首頁</a>
+        <a id="backLevelLink" href="./二胡小教室.html">回課程頁</a>
+        <a href="./二胡小教室-影片.html">影片工具</a>
+        <a href="./二胡小教室-練習打卡.html">每週打卡</a>
+      </nav>
+    </header>
+
+    <section class="hero">
+      <div class="eyebrow" id="weekLabel"></div>
+      <h1 id="weekTitle"></h1>
+      <p id="weekDescription"></p>
+    </section>
+
+    <section class="layout">
+      <article class="panel">
+        <div class="video-frame">
+          <iframe id="videoFrame" src="" title="每週教學影片" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+        </div>
+        <h2>本週教學重點</h2>
+        <ul class="bullet-list" id="focusList"></ul>
+        <h2>本週任務</h2>
+        <ul class="task-list" id="taskList"></ul>
+        <div class="actions">
+          <a class="button secondary" id="prevWeekLink" href="#">上一週</a>
+          <a class="button" id="nextWeekLink" href="#">下一週</a>
+        </div>
+      </article>
+
+      <aside class="score-card">
+        <h2 class="score-title">本週練習譜</h2>
+        <p>這裡先放每週對應的練習譜占位。之後你若給我真正的譜圖或 PDF，我可以直接換成圖片版或下載版。</p>
+        <div class="score-box">
+          <pre id="scoreText"></pre>
+        </div>
+        <p class="score-note" id="scoreNote"></p>
+      </aside>
+    </section>
+  </main>
+
+  <script>
+    const weeklyData = {
+      beginner: {
+        label: "初級",
+        backLink: "./二胡小教室-初級.html",
+        weeks: [
+          { title: "第 1 週：姿勢與持琴重整", description: "重整坐姿、琴筒位置、握弓與身體放鬆感。", video: "Mc7fJ2C1Qf8", focus: ["先把持琴與握弓位置放正。", "觀察肩膀是否放鬆。", "用鏡子檢查身體角度。"], tasks: ["完成 5 次姿勢檢查。", "錄 30 秒持琴姿勢影片。", "確認右手握弓不僵硬。"], score: "1  -  | 5  -  | 1  -  | 5  -\n1  1  | 5  5  | 1  -  | 5  -\n1  -  | 1  -  | 5  -  | 5  -\n1  1  | 1  1  | 5  5  | 5  5\n1  -  | 5  -  | 1  -  | 5  -\n1  1  | 5  5  | 1  -  | 5  -", note: "初級第 1 週以空弦與姿勢節奏為主。" },
+          { title: "第 2 週：基本長弓穩定", description: "練長弓平均、弓速控制與音色乾淨度。", video: "LfLqOT0SxwA", focus: ["每個長弓要拉滿。", "控制弓速平均。", "避免音頭太重。"], tasks: ["每天做 8 組長弓。", "錄一段長音回聽。", "穩定維持 4 拍長音。"], score: "5  -  | 5  -  | 3  -  | 2  -\n5  -  | 5  -  | 3  -  | 2  -\n1  -  | 2  -  | 3  -  | 5  -\n5  -  | 3  -  | 2  -  | 1  -\n1  -  | 3  -  | 5  -  | 6  -\n6  -  | 5  -  | 3  -  | 2  -", note: "先求穩，不求快。" },
+          { title: "第 3 週：內外弦切換", description: "建立切弦手感，讓弓路乾淨不混亂。", video: "xQom8S0v6FQ", focus: ["切弦動作要小。", "手肘轉換不要甩。", "保持聲音連續。"], tasks: ["完成 4 組切弦循環。", "配拍器做慢速切換。", "回聽是否有雜音。"], score: "1 5 1 5 | 1 5 1 5\n1 1 5 5 | 1 1 5 5\n1 5 5 1 | 1 5 5 1\n1 1 1 5 | 5 5 5 1\n1 5 1 5 | 1 5 1 5\n1 1 5 5 | 1 1 5 5", note: "這週主角是弓路與切弦準確。" },
+          { title: "第 4 週：節奏與短句", description: "用拍器把短句拉穩，建立拍點概念。", video: "Mc7fJ2C1Qf8", focus: ["句子先拆短。", "拍點要穩。", "短句收尾乾淨。"], tasks: ["拍器下完成 8 小節。", "每句至少重複 3 次。", "避免中途停頓。"], score: "1 2 3 5 | 5 3 2 1\n1 2 3 5 | 6 5 3 2\n2 3 5 6 | 5 3 2 1\n1 - 2 - | 3 - 5 -\n2 3 2 1 | 2 3 5 6\n5 3 2 1 | 1 - - -", note: "先把短句完整，不急著拉長段落。" },
+          { title: "第 5 週：左手按音基礎", description: "加入按音和簡單音階，開始建立音準感。", video: "LfLqOT0SxwA", focus: ["手指落點要穩。", "每個音都先聽準。", "按音後肩膀仍放鬆。"], tasks: ["完成上下行音階 4 次。", "記錄最不穩的兩個音。", "練完回聽音準。"], score: "1 2 3 5 | 5 3 2 1\n1 2 3 5 | 6 5 3 2\n1 1 2 2 | 3 3 5 5\n5 5 3 3 | 2 2 1 1\n1 2 3 5 | 6 5 3 2\n2 3 5 6 | 5 3 2 1", note: "開始進入左手訓練。" },
+          { title: "第 6 週：音階反覆校正", description: "反覆修正落點，讓耳朵和手指對齊。", video: "xQom8S0v6FQ", focus: ["同一個音反覆確認。", "先少量音再加長。", "偏音要做記號。"], tasks: ["每天做 2 輪音階校正。", "錄音回聽 1 次。", "標出偏高偏低位置。"], score: "1 1 2 2 | 3 3 5 5\n5 5 3 3 | 2 2 1 1\n1 2 1 2 | 3 5 3 5\n5 3 2 1 | 2 3 5 6\n1 2 3 5 | 3 2 1 2\n3 5 6 5 | 3 2 1 -", note: "重點是重複，不是求新。" },
+          { title: "第 7 週：分弓與連弓", description: "把常見弓法放進簡單樂句中練習。", video: "Mc7fJ2C1Qf8", focus: ["分弓要清楚。", "連弓要順。", "句子不要斷掉。"], tasks: ["同一句做分弓版與連弓版。", "比較音色差異。", "完整錄一段。"], score: "1 2 3-5 | 5-3 2 1\n1-2 3 5 | 6-5 3 2\n2 3-5 6 | 5 3-2 1\n1 2 3 5 | 5-5 3 2\n1-2 3-5 | 6 5 3-2\n1 2-3 5 | 3 2 1 -", note: "弓法開始進入句子。" },
+          { title: "第 8 週：基礎旋律整合", description: "開始把姿勢、節奏和音準放進旋律。", video: "LfLqOT0SxwA", focus: ["保持完整旋律感。", "音準與節奏同時顧。", "不要只顧單點。"], tasks: ["完成一段短旋律。", "中途不停下。", "錄音回看流暢度。"], score: "5 6 5 3 | 2 3 2 1\n1 2 3 5 | 6 5 3 2\n2 3 5 6 | 5 3 2 1\n1 - 5 - | 3 2 1 -\n1 2 3 5 | 5 6 5 3\n2 3 2 1 | 1 - - -", note: "第一次進入完整旋律練習。" },
+          { title: "第 9 週：完整段落演奏", description: "連續拉完一段短曲，不中斷完成。", video: "xQom8S0v6FQ", focus: ["演奏不能中斷。", "先求完整。", "錯音先做記號。"], tasks: ["完整拉完一段。", "記錄卡住的位置。", "第二次再修正。"], score: "1 2 3 5 | 6 5 3 2\n1 2 3 5 | 5 3 2 1\n2 3 5 6 | 1' 6 5 3\n2 1 2 3 | 5 - - -\n1 2 3 5 | 6 5 3 2\n2 3 5 6 | 5 3 2 1", note: "這週要開始像表演，而不是片段練習。" },
+          { title: "第 10 週：初級成果驗收", description: "錄下一段完整基礎演奏，作為初級收尾。", video: "Mc7fJ2C1Qf8", focus: ["從頭到尾完成。", "維持姿勢與穩定。", "留下成果版本。"], tasks: ["錄一支完整版本。", "聽一次並寫 3 個心得。", "準備進入中級。"], score: "1 2 3 5 | 6 5 3 2\n1 2 3 5 | 5 3 2 1\n2 3 5 6 | 5 3 2 1\n1 2 3 5 | 6 5 3 2\n2 3 5 6 | 5 3 2 1\n1 - - - | 1 - - -", note: "這一週的譜可以直接換成你的成果曲譜。" }
+        ]
+      },
+      intermediate: {
+        label: "中級",
+        backLink: "./二胡小教室-中級.html",
+        weeks: [
+          { title: "第 1 週：換把定位重整", description: "重新整理換把的目標音與手位移動。", video: "LfLqOT0SxwA", focus: ["換把前先想目標音。", "動作要短。", "保持音準。"], tasks: ["做 10 次目標換把。", "錄 1 段換把片段。", "標記常偏的位置。"], score: "1 3 5 1' | 7 6 5 3\n2 5 6 1' | 7 6 5 2\n1 2 3 5 | 6 1' 7 6\n5 3 2 1 | 2 3 5 -\n1 3 5 1' | 6 5 3 2\n2 5 6 1' | 7 6 5 3", note: "中級譜例著重換把定位。" },
+          { title: "第 2 週：揉弦穩定起步", description: "建立小幅度、可控制的揉弦動作。", video: "xQom8S0v6FQ", focus: ["揉弦先小。", "不要掉音。", "配合長音。"], tasks: ["4 個長音揉弦。", "比較有無揉弦差異。", "回聽音準是否穩。"], score: "5~~~ 3~~~ 2~~~ 1~~~\n5~~~ 6~~~ 5~~~ 3~~~\n2~~~ 3~~~ 5~~~ 6~~~\n5~~~ 3~~~ 2~~~ 1~~~\n5~~~ 6~~~ 1'~~~ 6~~~", note: "~~~ 表示持續揉弦。" },
+          { title: "第 3 週：音色控制訓練", description: "練習不同力度和接觸位置造成的音色差異。", video: "Mc7fJ2C1Qf8", focus: ["同一句做強弱變化。", "拉出層次。", "保持乾淨音色。"], tasks: ["完成一組強弱對比。", "錄音比較前後。", "維持穩定弓速。"], score: "1 2 3 5 | 3 5 6 5\n6 5 3 2 | 2 1 - -\n1 2 3 5 | 6 1' 7 6\n5 3 2 1 | 2 3 5 -\n1 2 3 5 | 3 5 6 5", note: "中級開始要加入力度設計。" },
+          { title: "第 4 週：弓法組合進階", description: "把分弓、連弓、重音放進更長的句子。", video: "LfLqOT0SxwA", focus: ["重音要有位置。", "弓法切換要順。", "句子不中斷。"], tasks: ["同句做兩種弓法。", "拍器下完成。", "記錄最難一格。"], score: "1 2-3 5 | 5-3 2 1\n1-2 3 5 | 6-5 3 2\n2 3-5 6 | 5 3-2 1\n2-3 5 6 | 1'-6 5 3\n5 3-2 1 | 2 3 5 -", note: "這週重點是弓法切換與句子連續。" },
+          { title: "第 5 週：中速節奏穩定", description: "從慢速跨到中速，保持節奏與音準不散。", video: "xQom8S0v6FQ", focus: ["拍速逐步增加。", "亂掉就退回。", "不要硬追速度。"], tasks: ["至少提升兩段拍速。", "每段都完整拉對。", "保持放鬆。"], score: "1 2 3 5 | 6 5 3 2\n1 2 3 5 | 6 1' 7 6\n5 3 2 1 | 2 3 5 -\n2 3 5 6 | 1' 6 5 3\n2 1 2 3 | 5 3 2 1\n1 - - - | 1 - - -", note: "逐步加速，不一次跳太快。" },
+          { title: "第 6 週：段落與換氣感", description: "讓演奏不只正確，也開始有句子方向。", video: "Mc7fJ2C1Qf8", focus: ["設計句子高低。", "收尾清楚。", "有呼吸感。"], tasks: ["畫出句子段落。", "完整拉 2 次。", "回聽是否有層次。"], score: "1 2 3 5 | 6 5 3 2\n2 3 5 6 | 1' 6 5 3\n2 1 2 3 | 5 - - -\n1 2 3 5 | 6 1' 7 6\n5 3 2 1 | 2 3 5 -", note: "把句子切出結構感。" },
+          { title: "第 7 週：耐力與不中斷演奏", description: "提升中段演奏耐力與注意力維持。", video: "LfLqOT0SxwA", focus: ["演奏長段落。", "錯音不立刻停。", "保持節奏。"], tasks: ["連續拉 16 小節。", "標記問題點。", "第二輪修正。"], score: "1 2 3 5 | 6 5 3 2\n1 2 3 5 | 6 1' 7 6\n5 3 2 1 | 2 3 5 6\n5 3 2 1 | 1 - - -\n1 2 3 5 | 6 5 3 2\n2 3 5 6 | 1' 6 5 3", note: "耐力比短句更重要。" },
+          { title: "第 8 週：速度提升訓練", description: "逐步提高拍速，維持乾淨與穩定。", video: "xQom8S0v6FQ", focus: ["速度上升仍乾淨。", "手不能緊。", "句子要完整。"], tasks: ["每次加 4 bpm。", "完成 3 段速度。", "回聽是否變亂。"], score: "1 2 3 5 6 5 3 2\n2 3 5 6 1' 6 5 3\n5 6 5 3 2 3 2 1\n1 3 5 6 1' 7 6 5\n3 2 1 2 3 5 6 5", note: "速度上來更要放鬆。" },
+          { title: "第 9 週：技巧整合到曲目", description: "把換把、揉弦、弓法整合進完整段落。", video: "Mc7fJ2C1Qf8", focus: ["技巧為曲子服務。", "不要只顧招式。", "段落表現一致。"], tasks: ["挑一段曲目整合。", "錄影回看。", "寫下 3 個修正點。"], score: "1 3 5 1' | 7 6 5 3\n2 3 5 6 | 1' 6 5 3\n2 1 2 3 | 5 - - -\n1 2 3 5 | 6 1' 7 6\n5 3 2 1 | 2 3 5 -", note: "把技巧真的放回曲子裡。" },
+          { title: "第 10 週：中級成果錄影", description: "完成一段具有表情和完整段落感的演奏。", video: "LfLqOT0SxwA", focus: ["保有表情。", "完成整段。", "錄成成果版本。"], tasks: ["錄一支中級成果。", "回看姿勢與音色。", "準備進入高級。"], score: "1 3 5 1' | 7 6 5 3\n2 3 5 6 | 1' 6 5 3\n2 1 2 3 | 5 3 2 1\n1 2 3 5 | 6 5 3 2\n2 3 5 6 | 5 3 2 1\n1 - - - | 1 - - -", note: "成果曲譜可之後替換成正式版本。" }
+        ]
+      },
+      advanced: {
+        label: "高級",
+        backLink: "./二胡小教室-高級.html",
+        weeks: [
+          { title: "第 1 週：高強度長弓控制", description: "重新提升弓速、弓壓與音色統一性。", video: "xQom8S0v6FQ", focus: ["高強度仍要穩。", "音色統一。", "不要因為用力而緊。"], tasks: ["完成高強度長弓 8 組。", "錄 1 段高低強弱對比。", "回聽音色均勻度。"], score: "5--- 3--- 2--- 1---\n6--- 5--- 3--- 2---\n1'--- 6--- 5--- 3---\n2--- 3--- 5--- 6---\n1'--- 7--- 6--- 5---\n5--- 3--- 2--- 1---", note: "高級先從控制力回頭校正。" },
+          { title: "第 2 週：快速換把與定位", description: "處理高速度下的手位準確與穩定。", video: "Mc7fJ2C1Qf8", focus: ["高速度目標更準。", "手位移動短。", "聲音不能糊。"], tasks: ["做快速換把 12 次。", "拍器提速測試。", "記錄不穩位置。"], score: "1 3 5 1' | 7 6 5 3\n2 5 6 1' | 7 6 5 2\n3 5 6 1' | 2' 1' 7 6\n5 6 1' 2' | 1' 7 6 5\n3 5 6 1' | 7 6 5 3", note: "高級換把要快又準。" },
+          { title: "第 3 週：複合弓法連接", description: "把複雜弓法放在高難度片段中完成。", video: "LfLqOT0SxwA", focus: ["複合弓法順接。", "重音位置清楚。", "整段不散。"], tasks: ["慢速拆解。", "回到原速。", "完成一段錄音。"], score: "1 2-3 5 | 6-5 3 2\n2 3-5 6 | 1'-6 5 3\n5-6 1' 7 | 6-5 3 2\n2 3-5 6 | 1' 7-6 5\n3 5 6-1' | 7 6 5 3", note: "高級弓法重點是連接與乾淨。" },
+          { title: "第 4 週：揉弦與表情深化", description: "精修不同速度、不同情緒的揉弦效果。", video: "xQom8S0v6FQ", focus: ["揉弦速度有變化。", "符合樂句情緒。", "不犧牲音準。"], tasks: ["同句做兩種表情。", "錄音比較。", "選最適合版本。"], score: "5~~~ 6~~~~ 5~~~ 3~~~\n2~~~ 3~~~~ 5~~~ 6~~~\n1'~~~~ 7~~~ 6~~~ 5~~~\n3~~~ 2~~~ 1~~~ 2~~~\n5~~~ 6~~~~ 1'~~~ 6~~~", note: "揉弦開始服務於表情。" },
+          { title: "第 5 週：高速度節奏穩定", description: "在更高拍速下維持乾淨、準確與放鬆。", video: "Mc7fJ2C1Qf8", focus: ["高拍速不能亂。", "動作要更小。", "節奏更精確。"], tasks: ["逐步加速。", "維持乾淨音色。", "完成 3 次原速。"], score: "1 2 3 5 6 1' 7 6\n5 6 1' 7 6 5 3 2\n3 5 6 1' 7 6 5 3\n2 3 5 6 1' 7 6 5\n3 5 6 1' 2' 1' 7 6\n5 3 2 1 2 3 5 6", note: "這週的譜更接近高難度片段。" },
+          { title: "第 6 週：段落推進與層次", description: "設計樂句起伏、呼吸感和結構感。", video: "LfLqOT0SxwA", focus: ["分層次演奏。", "有推進方向。", "收尾清楚。"], tasks: ["標出起承轉合。", "完整拉一次。", "寫下段落設計。"], score: "1 2 3 5 | 6 5 3 2\n2 3 5 6 | 1' 7 6 5\n3 2 1 2 | 5 - - -\n1 2 3 5 | 6 1' 7 6\n5 6 1' 7 | 6 5 3 2\n2 1 2 3 | 5 - - -", note: "高級要開始設計整段敘事。" },
+          { title: "第 7 週：困難段拆解修正", description: "鎖定最難片段，做精準拆解練習。", video: "xQom8S0v6FQ", focus: ["找最難的 2 小節。", "拆出節奏、弓法、指法。", "再組回原段。"], tasks: ["列出困難段。", "拆練 3 輪。", "回到整段測試。"], score: "1' 7 6 5 | 6 5 3 2\n1' 7 6 5 | 3 2 1 -\n2 3 5 6 | 1' 6 5 3\n1' 7 6 5 | 6 5 3 2\n3 5 6 1' | 7 6 5 3", note: "這週是修正週，不是拼命往下練。" },
+          { title: "第 8 週：整首曲目連續演奏", description: "訓練從頭到尾不中斷完成曲目。", video: "Mc7fJ2C1Qf8", focus: ["完整演奏。", "不中斷。", "保持專注。"], tasks: ["至少完成兩次整首。", "第一次不修，第二次修。", "記錄失誤點。"], score: "1 2 3 5 | 6 1' 7 6\n5 6 1' 7 | 6 5 3 2\n2 3 5 6 | 1' 6 5 3\n2 1 2 3 | 5 - - -\n1 2 3 5 | 6 1' 7 6\n5 3 2 1 | 2 3 5 -", note: "練的是完整度。" },
+          { title: "第 9 週：錄影回看與舞台修正", description: "用錄影檢查音色、動作與舞台完整度。", video: "LfLqOT0SxwA", focus: ["不只聽，也要看。", "修動作與表情。", "調整舞台感。"], tasks: ["錄影 1 次。", "回看並寫 3 個問題。", "做第二次修正版。"], score: "1 2 3 5 | 6 1' 7 6\n5 6 1' 7 | 6 5 3 2\n2 3 5 6 | 1' 6 5 3\n3 5 6 1' | 7 6 5 3\n2 1 2 3 | 5 - - -", note: "錄影是高級課程的必備工具。" },
+          { title: "第 10 週：高級總驗收", description: "完成正式版本錄影，作為高級課程成果輸出。", video: "xQom8S0v6FQ", focus: ["像正式演出一樣。", "從頭到尾完成。", "留下最終版本。"], tasks: ["錄正式版。", "回看完整度。", "保留成果檔案。"], score: "1 2 3 5 | 6 1' 7 6\n5 6 1' 7 | 2' 1' 7 6\n5 3 2 1 | 2 3 5 6\n1' 7 6 5 | 3 2 1 -\n1 2 3 5 | 6 1' 7 6\n5 3 2 1 | 1 - - -", note: "最後可直接換成你的正式演出曲譜。" }
+        ]
+      }
+    };
+
+    const params = new URLSearchParams(window.location.search);
+    const level = params.get("level") || "beginner";
+    const week = Math.min(10, Math.max(1, Number(params.get("week") || "1")));
+    const course = weeklyData[level] || weeklyData.beginner;
+    const data = course.weeks[week - 1];
+
+    document.title = "二胡小教室 | " + course.label + "第 " + week + " 週";
+    document.getElementById("backLevelLink").href = course.backLink;
+    document.getElementById("backLevelLink").textContent = "回" + course.label + "課程";
+    document.getElementById("weekLabel").textContent = course.label + "課程｜第 " + week + " 週";
+    document.getElementById("weekTitle").textContent = data.title;
+    document.getElementById("weekDescription").textContent = data.description;
+    document.getElementById("videoFrame").src = "https://www.youtube.com/embed/" + data.video + "?rel=0";
+    document.getElementById("scoreText").textContent = data.score;
+    document.getElementById("scoreNote").textContent = data.note;
+
+    const focusList = document.getElementById("focusList");
+    const taskList = document.getElementById("taskList");
+    data.focus.forEach((item) => {
+      const li = document.createElement("li");
+      li.textContent = item;
+      focusList.appendChild(li);
+    });
+    data.tasks.forEach((item) => {
+      const li = document.createElement("li");
+      li.textContent = item;
+      taskList.appendChild(li);
+    });
+
+    const prevWeek = Math.max(1, week - 1);
+    const nextWeek = Math.min(10, week + 1);
+    const prevLink = document.getElementById("prevWeekLink");
+    const nextLink = document.getElementById("nextWeekLink");
+    prevLink.href = "./二胡小教室-週課程.html?level=" + level + "&week=" + prevWeek;
+    nextLink.href = "./二胡小教室-週課程.html?level=" + level + "&week=" + nextWeek;
+    if (week === 1) prevLink.textContent = "已經是第一週";
+    if (week === 10) nextLink.textContent = "已經是最後一週";
+  </script>
+</body>
+</html>

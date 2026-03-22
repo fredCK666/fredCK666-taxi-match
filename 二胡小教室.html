@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>二胡小教室 | 課程分級入口</title>
+  <style>
+    :root {
+      --ink: #211914;
+      --muted: #69584d;
+      --paper: rgba(255, 250, 244, 0.92);
+      --line: rgba(83, 57, 39, 0.12);
+      --wood: #7b4d2d;
+      --shadow: 0 22px 54px rgba(46, 28, 18, 0.14);
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      color: var(--ink);
+      font-family: "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", sans-serif;
+      background:
+        radial-gradient(circle at 0% 0%, rgba(241, 190, 113, 0.24), transparent 24%),
+        radial-gradient(circle at 90% 10%, rgba(117, 145, 104, 0.16), transparent 20%),
+        linear-gradient(180deg, #f7efe3 0%, #fbf9f5 40%, #efe4d5 100%);
+    }
+    a { color: inherit; text-decoration: none; }
+    .shell { width: min(1120px, calc(100% - 28px)); margin: 0 auto; padding: 24px 0 40px; }
+    .topbar { display: flex; justify-content: space-between; align-items: center; gap: 16px; margin-bottom: 20px; }
+    .brand { font-size: 22px; font-weight: 800; letter-spacing: 0.08em; }
+    .home-link { color: var(--muted); font-weight: 700; }
+    .hero, .card, .note {
+      border: 1px solid var(--line);
+      box-shadow: var(--shadow);
+      background: var(--paper);
+      border-radius: 28px;
+    }
+    .hero {
+      padding: 34px;
+      color: #fff8f1;
+      background:
+        radial-gradient(circle at 100% 0%, rgba(255, 222, 171, 0.18), transparent 26%),
+        linear-gradient(145deg, rgba(35, 25, 20, 0.98), rgba(109, 67, 40, 0.94));
+    }
+    .tag {
+      display: inline-flex;
+      padding: 8px 12px;
+      border-radius: 999px;
+      background: rgba(255, 248, 241, 0.12);
+      font-size: 13px;
+      letter-spacing: 0.12em;
+    }
+    h1 { margin: 16px 0 12px; font-size: clamp(34px, 6vw, 56px); line-height: 1.04; }
+    .hero p { margin: 0; max-width: 720px; line-height: 1.85; color: rgba(255, 248, 241, 0.84); }
+    .grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; margin-top: 22px; }
+    .card { padding: 24px; }
+    .eyebrow {
+      display: inline-flex;
+      margin-bottom: 14px;
+      padding: 6px 10px;
+      border-radius: 999px;
+      background: rgba(205, 145, 64, 0.14);
+      color: var(--wood);
+      font-size: 13px;
+      font-weight: 700;
+    }
+    .card h2 { margin: 0 0 10px; font-size: 26px; }
+    .card p, .note { color: var(--muted); line-height: 1.8; }
+    .button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 150px;
+      padding: 12px 16px;
+      border-radius: 999px;
+      background: linear-gradient(135deg, #efc06f, #ca8531);
+      color: #4d2f15;
+      font-weight: 800;
+    }
+    .note { margin-top: 18px; padding: 18px 20px; }
+    code {
+      padding: 2px 8px;
+      border-radius: 8px;
+      background: rgba(31, 26, 23, 0.06);
+      color: var(--ink);
+      font-family: "SFMono-Regular", Consolas, monospace;
+    }
+    @media (max-width: 820px) {
+      .grid { grid-template-columns: 1fr; }
+      .hero, .card { padding: 22px; }
+    }
+  </style>
+</head>
+<body>
+  <main class="shell">
+    <header class="topbar">
+      <div class="brand">二胡小教室</div>
+      <a class="home-link" href="./erhu/">回首頁入口</a>
+    </header>
+    <section class="hero">
+      <div class="tag">ERHU LEARNING HUB</div>
+      <h1>二胡課程分級入口</h1>
+      <p>這裡開始分成初級、中級、高級三條 10 週課程線。每個等級都有自己的每週主題、練習任務、影片安排與打卡節奏，不會全部混在一起。</p>
+    </section>
+    <section class="grid">
+      <article class="card">
+        <div class="eyebrow">BEGINNER</div>
+        <h2>初級課程</h2>
+        <p>適合剛入門或想重整基礎的人，內容從姿勢、長弓、切弦、音準一路練到第一段完整演奏。</p>
+        <a class="button" href="./二胡小教室-初級.html">進入初級</a>
+      </article>
+      <article class="card">
+        <div class="eyebrow">INTERMEDIATE</div>
+        <h2>中級課程</h2>
+        <p>適合已有基本演奏能力的人，會加強換把、揉弦、弓法組合、速度與段落控制。</p>
+        <a class="button" href="./二胡小教室-中級.html">進入中級</a>
+      </article>
+      <article class="card">
+        <div class="eyebrow">ADVANCED</div>
+        <h2>高級課程</h2>
+        <p>適合想把技巧整合成表現的人，重點放在控制力、音色設計、速度穩定與完整曲目演出。</p>
+        <a class="button" href="./二胡小教室-高級.html">進入高級</a>
+      </article>
+      <article class="card">
+        <div class="eyebrow">TOOLS</div>
+        <h2>通用學習工具</h2>
+        <p>這些工具頁可搭配三個等級一起使用，包括影片占位頁、每週打卡與週期檢核。</p>
+        <a class="button" href="./二胡小教室-影片.html">查看工具</a>
+      </article>
+    </section>
+    <section class="note">
+      課程分級入口檔案：<code>二胡小教室.html</code><br />
+      三個等級都各自有 10 週內容，之後也可以再分別接上各自的影片。
+    </section>
+  </main>
+</body>
+</html>
