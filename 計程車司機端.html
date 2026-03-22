@@ -30,9 +30,9 @@
     import {
       getFirestore, doc, setDoc, getDoc, updateDoc,
       collection, query, onSnapshot, serverTimestamp,
-      where
+      where, runTransaction
     } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
-    import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged, setPersistence, inMemoryPersistence } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+    import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged, setPersistence, browserLocalPersistence } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyBOd-dnst84kBMLSkaC0NrQ-k_1NOOeCEE",
@@ -48,9 +48,17 @@
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
     const auth = getAuth(app);
-    setPersistence(auth, inMemoryPersistence).catch(()=>{});
+    setPersistence(auth, browserLocalPersistence).catch(()=>{});
 
     let plate = "", color = "";
+    const safeText = (value) => String(value ?? "").replace(/[&<>"']/g, (char) => ({
+      "&": "&amp;",
+      "<": "&lt;",
+      ">": "&gt;",
+      '"': "&quot;",
+      "'": "&#39;"
+    }[char]));
+    const safeJsString = (value) => String(value ?? "").replace(/\\/g, "\\\\").replace(/'/g, "\\'");
 
     onAuthStateChanged(auth, async (user) => {
       if (user) {
@@ -134,14 +142,32 @@
       const user = auth.currentUser;
       if (!user) return alert("尚未登入");
       const rideRef = doc(db, "rides", rideId);
-      const payload = {};
       if (newStatus === "accepted") {
-        payload.status = "accepted";
-        payload.driverId = user.uid;
-        payload.driverEmail = user.email || "";
-        if (plate) payload.plate = plate;
-        if (color) payload.color = color;
+        try {
+          await runTransaction(db, async (transaction) => {
+            const snap = await transaction.get(rideRef);
+            if (!snap.exists()) {
+              throw new Error("訂單不存在");
+            }
+            const ride = snap.data();
+            if (ride.status !== "pending") {
+              throw new Error("這筆訂單已被其他司機接走");
+            }
+            const payload = {
+              status: "accepted",
+              driverId: user.uid,
+              driverEmail: user.email || ""
+            };
+            if (plate) payload.plate = plate;
+            if (color) payload.color = color;
+            transaction.update(rideRef, payload);
+          });
+        } catch (error) {
+          alert(error.message || "接單失敗，請重新整理後再試");
+        }
+        return;
       }
+      const payload = {};
       if (newStatus === "in_progress") {
         payload.status = "in_progress";
         payload.startedAt = serverTimestamp();
@@ -215,21 +241,21 @@
         const isCanceled = data.status === "canceled";
         div.style.background = isCanceled ? "#fff0f0" : "#fff";
         div.innerHTML = `
-<b>狀態：</b>${statusLabel}<br>
-<b>電話：</b>${data.phone || ""}<br>
-<b>預約時間：</b>${data.type === "reservation" ? (data.reservationTime || "") : "立即叫車"}<br>
-<b>起點：</b>${data.from || ""}<br>
-<b>終點：</b>${data.to || ""}<br>
-<b>備註：</b>${data.note || "無"}<br>
+<b>狀態：</b>${safeText(statusLabel)}<br>
+<b>電話：</b>${safeText(data.phone || "")}<br>
+<b>預約時間：</b>${safeText(data.type === "reservation" ? (data.reservationTime || "") : "立即叫車")}<br>
+<b>起點：</b>${safeText(data.from || "")}<br>
+<b>終點：</b>${safeText(data.to || "")}<br>
+<b>備註：</b>${safeText(data.note || "無")}<br>
 <div class="row-actions">
-  ${data.status === "pending" ? `<button onclick="acceptRide('${data.id}')">接單</button>` : ""}
+  ${data.status === "pending" ? `<button onclick="acceptRide('${safeJsString(data.id)}')">接單</button>` : ""}
   ${data.status === "accepted" ? `
     <a href="https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(data.from || "")}" target="_blank">🧭 前往起點</a><br>
-    <button onclick="startRide('${data.id}')">開始行程</button>
+    <button onclick="startRide('${safeJsString(data.id)}')">開始行程</button>
   ` : ""}
   ${data.status === "in_progress" ? `
     <a href="https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(data.to || "")}" target="_blank">🧭 前往終點</a><br>
-    <button onclick="completeRide('${data.id}')">完成行程</button>
+    <button onclick="completeRide('${safeJsString(data.id)}')">完成行程</button>
   ` : ""}
 </div>
 `;
@@ -261,15 +287,15 @@
         const div = document.createElement("div");
         div.className = "ride";
         div.innerHTML = `
-<b>狀態：</b>${statusLabel}<br>
-<b>電話：</b>${data.phone || ""}<br>
-<b>預約時間：</b>${data.type === "reservation" ? (data.reservationTime || "") : "立即叫車"}<br>
-<b>起點：</b>${data.from || ""}<br>
-<b>終點：</b>${data.to || ""}<br>
-<b>行駛時間：</b>${duration} 分鐘<br>
-${data.rating ? `<b>乘客評分：</b>${"⭐".repeat(Math.min(5, data.rating))}<br>` : ""}
-${data.review ? `<b>評論：</b>${data.review}<br>` : ""}
-${data.fare ? `<b>收取金額：</b>${data.fare} 元<br>` : ""}
+<b>狀態：</b>${safeText(statusLabel)}<br>
+<b>電話：</b>${safeText(data.phone || "")}<br>
+<b>預約時間：</b>${safeText(data.type === "reservation" ? (data.reservationTime || "") : "立即叫車")}<br>
+<b>起點：</b>${safeText(data.from || "")}<br>
+<b>終點：</b>${safeText(data.to || "")}<br>
+<b>行駛時間：</b>${safeText(duration)} 分鐘<br>
+${data.rating ? `<b>乘客評分：</b>${safeText("⭐".repeat(Math.min(5, data.rating)))}<br>` : ""}
+${data.review ? `<b>評論：</b>${safeText(data.review)}<br>` : ""}
+${data.fare ? `<b>收取金額：</b>${safeText(data.fare)} 元<br>` : ""}
 `;
         container.appendChild(div);
       });

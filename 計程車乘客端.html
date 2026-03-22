@@ -239,6 +239,8 @@
   .status-chip {
     background: var(--info-soft);
     color: var(--info);
+    font-size: 15px;
+    padding: 10px 14px;
   }
 
   .double {
@@ -325,43 +327,72 @@
   .status-card {
     display: flex;
     flex-direction: column;
-    gap: 14px;
-    padding: 18px;
-    border-radius: 20px;
+    gap: 18px;
+    padding: 24px 20px;
+    border-radius: 24px;
     background: linear-gradient(180deg, rgba(255, 248, 225, 0.9), rgba(255, 255, 255, 0.95));
     border: 1px solid rgba(255, 179, 0, 0.22);
+    box-shadow: 0 18px 36px rgba(245, 124, 0, 0.12);
+  }
+
+  .status-card .card-title {
+    font-size: 24px;
+    line-height: 1.15;
+  }
+
+  .status-card .muted {
+    font-size: 15px;
   }
 
   .timeline {
     display: grid;
-    gap: 12px;
+    gap: 14px;
   }
 
   .timeline-item {
     display: flex;
-    gap: 12px;
+    gap: 14px;
     align-items: flex-start;
   }
 
+  .timeline-item strong {
+    display: block;
+    font-size: 18px;
+    margin-bottom: 4px;
+  }
+
+  .timeline-item .muted {
+    font-size: 16px;
+    line-height: 1.7;
+  }
+
   .timeline-dot {
-    width: 12px;
-    height: 12px;
+    width: 14px;
+    height: 14px;
     border-radius: 50%;
     background: var(--brand-deep);
-    margin-top: 7px;
-    box-shadow: 0 0 0 6px rgba(255, 179, 0, 0.16);
+    margin-top: 8px;
+    box-shadow: 0 0 0 8px rgba(255, 179, 0, 0.16);
   }
 
   .driver-box {
-    padding: 16px;
-    border-radius: 18px;
+    padding: 18px;
+    border-radius: 20px;
     background: var(--accent-soft);
     color: #0f4f48;
+    font-size: 16px;
+    line-height: 1.7;
+  }
+
+  .driver-box strong {
+    display: block;
+    font-size: 20px;
+    margin-bottom: 10px;
   }
 
   .info-list {
     display: grid;
-    gap: 10px;
+    gap: 12px;
     margin-top: 12px;
   }
 
@@ -369,10 +400,15 @@
     display: flex;
     justify-content: space-between;
     gap: 12px;
-    padding: 12px 14px;
-    border-radius: 16px;
+    padding: 16px;
+    border-radius: 18px;
     background: rgba(255, 255, 255, 0.8);
     border: 1px solid rgba(15, 23, 42, 0.06);
+  }
+
+  .info-item span {
+    font-size: 16px;
+    line-height: 1.6;
   }
 
   .info-item span:last-child {
@@ -383,11 +419,11 @@
   .stars {
     display: flex;
     gap: 8px;
-    margin: 14px 0 10px;
+    margin: 16px 0 12px;
   }
 
   .star {
-    font-size: 30px;
+    font-size: 40px;
     cursor: pointer;
     filter: grayscale(100%);
     opacity: 0.45;
@@ -412,6 +448,21 @@
     background: #fff;
     border: 1px solid rgba(15, 23, 42, 0.08);
     box-shadow: 0 10px 22px rgba(15, 23, 42, 0.06);
+  }
+
+  #rating-form {
+    padding: 22px;
+    border-radius: 24px;
+  }
+
+  #rating-form .card-title {
+    font-size: 24px;
+    line-height: 1.2;
+  }
+
+  #rating-form .hint {
+    font-size: 16px;
+    line-height: 1.75;
   }
 
   .history-top {
@@ -473,8 +524,8 @@
 </style>
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-  import { getFirestore, addDoc, collection, doc, onSnapshot, updateDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
-  import { getAuth, signInAnonymously, setPersistence, inMemoryPersistence, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+  import { getFirestore, addDoc, collection, doc, onSnapshot, updateDoc, serverTimestamp, getDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+  import { getAuth, signInAnonymously, setPersistence, browserLocalPersistence, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 
   const firebaseConfig = {
     apiKey: "AIzaSyBOd-dnst84kBMLSkaC0NrQ-k_1NOOeCEE",
@@ -507,12 +558,43 @@
   let isSubmitting = false;
   let pickedStars = 0;
   let unsubscribeRide = null;
+  const ACTIVE_RIDE_KEY = "activeRideId";
 
   const qs = (id) => document.getElementById(id);
   const formatStatus = (status) => STATUS_LABELS[status] || status || "尚未建立";
+  const safeText = (value) => String(value ?? "").replace(/[&<>"']/g, (char) => ({
+    "&": "&amp;",
+    "<": "&lt;",
+    ">": "&gt;",
+    '"': "&quot;",
+    "'": "&#39;"
+  }[char]));
 
   function getSavedPhone() {
     return localStorage.getItem("savedPhone") || "";
+  }
+
+  async function ensureAnonymousSession(user = auth.currentUser) {
+    if (!user) {
+      await signInAnonymously(auth);
+      return;
+    }
+    if (!user.isAnonymous) {
+      await signOut(auth);
+      await signInAnonymously(auth);
+    }
+  }
+
+  function getActiveRideId() {
+    return localStorage.getItem(ACTIVE_RIDE_KEY) || "";
+  }
+
+  function setActiveRideId(rideId) {
+    if (rideId) {
+      localStorage.setItem(ACTIVE_RIDE_KEY, rideId);
+    } else {
+      localStorage.removeItem(ACTIVE_RIDE_KEY);
+    }
   }
 
   function historyKey(phone) {
@@ -582,8 +664,8 @@
       driverInfo.innerHTML = `
         <strong>司機資訊已更新</strong>
         <div class="info-list">
-          <div class="info-item"><span>車牌號碼</span><span>${plate}</span></div>
-          <div class="info-item"><span>車身顏色</span><span>${color}</span></div>
+          <div class="info-item"><span>車牌號碼</span><span>${safeText(plate)}</span></div>
+          <div class="info-item"><span>車身顏色</span><span>${safeText(color)}</span></div>
         </div>
       `;
       driverInfo.classList.remove("hidden");
@@ -598,6 +680,12 @@
       ratingForm.classList.remove("hidden");
     } else {
       ratingForm.classList.add("hidden");
+    }
+
+    if (["pending", "accepted", "in_progress", "completed"].includes(data.status)) {
+      setActiveRideId(currentRideId);
+    } else {
+      setActiveRideId("");
     }
   }
 
@@ -623,14 +711,14 @@
             <article class="history-card">
               <div class="history-top">
                 <strong>${MODE_LABELS[record.mode] || "叫車紀錄"}</strong>
-                <span class="mode-badge">${record.time}</span>
+                <span class="mode-badge">${safeText(record.time)}</span>
               </div>
               <div class="info-list">
-                <div class="info-item"><span>上車地點</span><span>${record.from}</span></div>
-                <div class="info-item"><span>目的地</span><span>${record.to}</span></div>
-                <div class="info-item"><span>手機號碼</span><span>${record.phone}</span></div>
-                <div class="info-item"><span>建立時間</span><span>${record.createdAt}</span></div>
-                <div class="info-item"><span>備註</span><span>${record.note || "無"}</span></div>
+                <div class="info-item"><span>上車地點</span><span>${safeText(record.from)}</span></div>
+                <div class="info-item"><span>目的地</span><span>${safeText(record.to)}</span></div>
+                <div class="info-item"><span>手機號碼</span><span>${safeText(record.phone)}</span></div>
+                <div class="info-item"><span>建立時間</span><span>${safeText(record.createdAt)}</span></div>
+                <div class="info-item"><span>備註</span><span>${safeText(record.note || "無")}</span></div>
               </div>
               <div class="actions" style="margin-top:14px; grid-template-columns: 1fr;">
                 <button class="btn-ghost" onclick="deleteHistory(${originalIndex})">刪除此筆紀錄</button>
@@ -654,6 +742,7 @@
     }
     currentRideId = "";
     currentRideData = null;
+    setActiveRideId("");
     ["from", "to", "time", "note", "fare", "review"].forEach((id) => {
       qs(id).value = "";
     });
@@ -698,21 +787,15 @@
       isSubmitting = false;
     }, 2500);
 
-    const user = auth.currentUser;
-    if (!user || !user.isAnonymous) {
-      try {
-        if (user && !user.isAnonymous) await signOut(auth);
-      } catch (error) {
-        console.error(error);
-      }
-      try {
-        await signInAnonymously(auth);
-      } catch (error) {
-        console.error(error);
-      }
-      alert("系統已切換為匿名模式，請再按一次送出叫車");
+    try {
+      await ensureAnonymousSession();
+    } catch (error) {
+      console.error(error);
+      alert("登入服務發生問題，請稍後再試");
       return;
     }
+    const user = auth.currentUser;
+    if (!user || !user.isAnonymous) return;
 
     const phone = getSavedPhone();
     const from = qs("from").value.trim();
@@ -761,6 +844,7 @@
 
     const ref = await addDoc(collection(db, "rides"), payload);
     currentRideId = ref.id;
+    setActiveRideId(ref.id);
     qs("ride-id").textContent = ref.id;
     showSection("status");
     renderHistory();
@@ -770,10 +854,16 @@
 
   function listenToRide() {
     if (unsubscribeRide) unsubscribeRide();
+    if (!currentRideId) return;
+    qs("ride-id").textContent = currentRideId;
+    showSection("status");
     const rideRef = doc(db, "rides", currentRideId);
     unsubscribeRide = onSnapshot(rideRef, (snap) => {
       const data = snap.data();
-      if (!data) return;
+      if (!data) {
+        setActiveRideId("");
+        return;
+      }
       renderRideStatus(data);
     });
   }
@@ -833,15 +923,10 @@
     renderHistory();
   };
 
-  await setPersistence(auth, inMemoryPersistence);
+  await setPersistence(auth, browserLocalPersistence);
   onAuthStateChanged(auth, async (user) => {
     try {
-      if (!user) {
-        await signInAnonymously(auth);
-      } else if (!user.isAnonymous) {
-        await signOut(auth);
-        await signInAnonymously(auth);
-      }
+      await ensureAnonymousSession(user);
     } catch (error) {
       alert("登入服務發生問題，請稍後再試");
       console.error(error);
@@ -850,6 +935,7 @@
 
   window.addEventListener("DOMContentLoaded", () => {
     const phone = getSavedPhone();
+    const activeRideId = getActiveRideId();
     if (phone) {
       qs("login-phone").value = phone;
       setLoggedIn(true);
@@ -859,6 +945,24 @@
     updateModeBanner("immediate");
     showSection("mode");
     renderHistory();
+    if (activeRideId) {
+      currentRideId = activeRideId;
+      getDoc(doc(db, "rides", activeRideId)).then((snap) => {
+        if (!snap.exists()) {
+          setActiveRideId("");
+          return;
+        }
+        const data = snap.data();
+        if (!data || data.phone !== getSavedPhone()) {
+          setActiveRideId("");
+          return;
+        }
+        renderRideStatus(data);
+        listenToRide();
+      }).catch(() => {
+        setActiveRideId("");
+      });
+    }
   });
 </script>
 </head>
@@ -878,7 +982,7 @@
           </div>
           <div>
             <div class="metric-label">服務區域</div>
-            <div class="metric-value">斗六</div>
+            <div class="metric-value">雲林</div>
           </div>
           <div>
             <div class="metric-label">支援模式</div>
@@ -1068,7 +1172,7 @@
           <h3 class="card-title">聯絡資訊</h3>
           <div class="hint">需要人工協助時，可直接撥打車行電話。</div>
           <div class="pill-row">
-            <span class="pill">斗六計程車</span>
+            <span class="pill">雲林計程車</span>
             <span class="pill">全年接送</span>
             <span class="pill">匿名登入</span>
           </div>
