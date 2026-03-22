@@ -1,0 +1,930 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8"/>
+<title>計程車管理後台</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<style>
+  :root {
+    --ink: #172033;
+    --muted: #6b7280;
+    --line: rgba(15, 23, 42, 0.08);
+    --surface: rgba(255, 255, 255, 0.9);
+    --surface-strong: #ffffff;
+    --brand: #ffb300;
+    --brand-deep: #ef6c00;
+    --good: #2e7d32;
+    --good-soft: #e8f5e9;
+    --warn: #ef6c00;
+    --warn-soft: #fff3e0;
+    --info: #1565c0;
+    --info-soft: #e3f2fd;
+    --danger: #c62828;
+    --danger-soft: #ffebee;
+    --shadow: 0 18px 42px rgba(15, 23, 42, 0.12);
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    min-height: 100vh;
+    color: var(--ink);
+    font-family: "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", sans-serif;
+    background:
+      radial-gradient(circle at top left, rgba(255, 224, 178, 0.95), transparent 28%),
+      radial-gradient(circle at top right, rgba(187, 222, 251, 0.75), transparent 28%),
+      linear-gradient(180deg, #fefcf6 0%, #fff8e8 36%, #f3f6fb 100%);
+    padding: 12px;
+  }
+
+  button, input, select {
+    font: inherit;
+    min-height: 48px;
+  }
+
+  .shell {
+    width: min(100%, 430px);
+    margin: 0 auto;
+    padding: 0;
+  }
+
+  .hero {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 18px;
+    margin-bottom: 18px;
+  }
+
+  .hero-card,
+  .panel,
+  .kpi,
+  .driver-card,
+  .ride-card,
+  .login-card {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 24px;
+    box-shadow: var(--shadow);
+    backdrop-filter: blur(10px);
+  }
+
+  .hero-card {
+    padding: 26px;
+  }
+
+  .hero-card.dark {
+    background: linear-gradient(145deg, rgba(23, 32, 51, 0.97), rgba(66, 43, 0, 0.94));
+    color: #fffdf8;
+    overflow: hidden;
+    position: relative;
+  }
+
+  .hero-card.dark::after {
+    content: "";
+    position: absolute;
+    right: -40px;
+    bottom: -40px;
+    width: 180px;
+    height: 180px;
+    border-radius: 50%;
+    background: rgba(255, 179, 0, 0.14);
+  }
+
+  .hero-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.1);
+    font-size: 12px;
+    letter-spacing: 0.08em;
+  }
+
+  h1, h2, h3, h4, p {
+    margin: 0;
+  }
+
+  .hero-card h1 {
+    margin-top: 14px;
+    font-size: clamp(28px, 4vw, 40px);
+    line-height: 1.08;
+  }
+
+  .hero-text {
+    margin-top: 10px;
+    max-width: 620px;
+    color: rgba(255, 253, 248, 0.8);
+    line-height: 1.75;
+  }
+
+  .hero-side {
+    display: grid;
+    gap: 18px;
+  }
+
+  .hero-meta {
+    display: grid;
+    gap: 12px;
+  }
+
+  .meta-box {
+    padding: 18px;
+    border-radius: 20px;
+    background: rgba(255, 255, 255, 0.78);
+    border: 1px solid rgba(15, 23, 42, 0.08);
+  }
+
+  .meta-label {
+    font-size: 13px;
+    color: var(--muted);
+  }
+
+  .meta-value {
+    margin-top: 8px;
+    font-size: 22px;
+    font-weight: 800;
+  }
+
+  .topbar {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    align-items: center;
+    margin-bottom: 18px;
+  }
+
+  .topbar-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    align-items: center;
+  }
+
+  .layout {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 18px;
+  }
+
+  .panel,
+  .login-card {
+    padding: 22px;
+  }
+
+  .section-head {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    align-items: flex-start;
+    margin-bottom: 16px;
+  }
+
+  .section-head p,
+  .hint,
+  .muted {
+    color: var(--muted);
+    font-size: 14px;
+    line-height: 1.7;
+  }
+
+  .kpi-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 14px;
+  }
+
+  .kpi {
+    padding: 18px;
+  }
+
+  .kpi-label {
+    font-size: 13px;
+    color: var(--muted);
+  }
+
+  .kpi-value {
+    margin-top: 10px;
+    font-size: 34px;
+    font-weight: 800;
+  }
+
+  .kpi.good { background: linear-gradient(180deg, rgba(232, 245, 233, 0.92), #fff); }
+  .kpi.warn { background: linear-gradient(180deg, rgba(255, 243, 224, 0.92), #fff); }
+  .kpi.info { background: linear-gradient(180deg, rgba(227, 242, 253, 0.92), #fff); }
+  .kpi.brand { background: linear-gradient(180deg, rgba(255, 248, 225, 0.96), #fff); }
+
+  .toolbar {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 12px;
+    margin-bottom: 16px;
+  }
+
+  input,
+  select {
+    width: 100%;
+    padding: 13px 14px;
+    border-radius: 16px;
+    border: 1px solid rgba(15, 23, 42, 0.12);
+    background: #fff;
+    color: var(--ink);
+  }
+
+  input:focus,
+  select:focus {
+    outline: none;
+    border-color: rgba(21, 101, 192, 0.35);
+    box-shadow: 0 0 0 4px rgba(21, 101, 192, 0.12);
+  }
+
+  button {
+    border: 0;
+    border-radius: 16px;
+    min-height: 50px;
+    padding: 12px 16px;
+    font-weight: 800;
+    cursor: pointer;
+    transition: transform 0.12s ease, opacity 0.12s ease;
+  }
+
+  button:hover { transform: translateY(-1px); }
+  button:active { transform: translateY(1px); }
+
+  .btn-primary {
+    color: #241700;
+    background: linear-gradient(135deg, #ffd54f, #ffb300);
+  }
+
+  .btn-secondary {
+    color: #003c72;
+    background: linear-gradient(135deg, #bbdefb, #90caf9);
+  }
+
+  .btn-ghost {
+    color: var(--ink);
+    background: #fff;
+    border: 1px solid rgba(15, 23, 42, 0.12);
+  }
+
+  .btn-danger {
+    color: var(--danger);
+    background: var(--danger-soft);
+  }
+
+  .driver-grid,
+  .ride-list {
+    display: grid;
+    gap: 14px;
+  }
+
+  .driver-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .driver-card,
+  .ride-card {
+    padding: 18px;
+  }
+
+  .driver-head,
+  .ride-head,
+  .badge-row,
+  .inline-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .badge-row {
+    justify-content: flex-start;
+    margin-top: 12px;
+  }
+
+  .badge,
+  .chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 7px 11px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 700;
+  }
+
+  .badge {
+    background: rgba(255, 179, 0, 0.16);
+    color: #965d00;
+  }
+
+  .chip.pending { background: var(--warn-soft); color: var(--warn); }
+  .chip.accepted { background: rgba(255, 249, 196, 0.95); color: #8d6e00; }
+  .chip.in_progress { background: var(--info-soft); color: var(--info); }
+  .chip.completed { background: var(--good-soft); color: var(--good); }
+  .chip.canceled { background: var(--danger-soft); color: var(--danger); }
+
+  .stats-row,
+  .info-grid {
+    display: grid;
+    gap: 10px;
+    margin-top: 14px;
+  }
+
+  .stats-row {
+    grid-template-columns: 1fr;
+  }
+
+  .info-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .stat-box,
+  .info-box {
+    padding: 12px 14px;
+    border-radius: 16px;
+    background: rgba(255, 255, 255, 0.88);
+    border: 1px solid rgba(15, 23, 42, 0.06);
+  }
+
+  .stat-box strong,
+  .info-box strong {
+    display: block;
+    font-size: 12px;
+    color: var(--muted);
+    margin-bottom: 6px;
+  }
+
+  .stat-box span,
+  .info-box span {
+    font-weight: 800;
+  }
+
+  .empty,
+  .alert {
+    padding: 18px;
+    border-radius: 18px;
+    border: 1px dashed rgba(15, 23, 42, 0.14);
+    color: var(--muted);
+    background: rgba(255, 255, 255, 0.64);
+  }
+
+  .alert.danger {
+    color: var(--danger);
+    background: var(--danger-soft);
+    border-style: solid;
+  }
+
+  .hidden { display: none !important; }
+
+  .stars { letter-spacing: 1px; }
+
+  @media (max-width: 640px) {
+    .topbar,
+    .section-head,
+    .driver-head,
+    .ride-head {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+    .topbar-actions,
+    .inline-actions {
+      width: 100%;
+    }
+    .topbar-actions button,
+    .inline-actions button {
+      width: 100%;
+    }
+  }
+</style>
+<script>
+  function renderStars(n) {
+    if (!n || n <= 0) return "未評分";
+    return `<span class="stars">${"⭐".repeat(Math.min(5, n))}</span>`;
+  }
+
+  function getTsMillis(value) {
+    if (!value) return 0;
+    if (value.seconds) return value.seconds * 1000;
+    if (typeof value === "number") return value;
+    return 0;
+  }
+
+  function formatDate(value) {
+    const ts = getTsMillis(value);
+    if (!ts) return "-";
+    return new Date(ts).toLocaleString();
+  }
+
+  function computeDurationMin(ride) {
+    const started = getTsMillis(ride.startedAt);
+    const completed = getTsMillis(ride.completedAt);
+    if (!started || !completed || completed < started) return null;
+    return Math.round((completed - started) / 60000);
+  }
+</script>
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+  import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+  import { getFirestore, collection, getDocs, query, where, deleteDoc, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyBOd-dnst84kBMLSkaC0NrQ-k_1NOOeCEE",
+    authDomain: "fred-54182.firebaseapp.com",
+    projectId: "fred-54182",
+    storageBucket: "fred-54182.appspot.com",
+    messagingSenderId: "110991560461",
+    appId: "1:110991560461:web:147689b76260547e6aaa44"
+  };
+
+  const STATUS_MAP = {
+    pending: "等待中",
+    accepted: "已接單",
+    in_progress: "行程中",
+    completed: "已完成",
+    canceled: "已取消"
+  };
+
+  const MODE_MAP = {
+    immediate: "立即單",
+    reservation: "預約單"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db = getFirestore(app);
+
+  const state = {
+    myUid: null,
+    isAdmin: false,
+    drivers: [],
+    rides: [],
+    selectedDriverId: "",
+    searchKeyword: "",
+    statusFilter: "all"
+  };
+
+  const qs = (id) => document.getElementById(id);
+
+  function safeText(value) {
+    return String(value ?? "").replace(/[&<>"']/g, (char) => ({
+      "&": "&amp;",
+      "<": "&lt;",
+      ">": "&gt;",
+      '"': "&quot;",
+      "'": "&#39;"
+    }[char]));
+  }
+
+  function driverLabel(driver) {
+    return driver.name || driver.email || driver.id;
+  }
+
+  function rideCreatedTs(ride) {
+    return getTsMillis(ride.createdAt) || ride.createdAtMs || 0;
+  }
+
+  function filteredDrivers() {
+    const keyword = state.searchKeyword.trim().toLowerCase();
+    if (!keyword) return state.drivers;
+    return state.drivers.filter((driver) => {
+      const target = [driver.name, driver.email, driver.plate, driver.color, driver.id]
+        .filter(Boolean)
+        .join(" ")
+        .toLowerCase();
+      return target.includes(keyword);
+    });
+  }
+
+  function filteredRecentRides() {
+    return state.rides
+      .filter((ride) => state.statusFilter === "all" ? true : ride.status === state.statusFilter)
+      .sort((a, b) => rideCreatedTs(b) - rideCreatedTs(a))
+      .slice(0, 10);
+  }
+
+  function selectedDriver() {
+    return state.drivers.find((driver) => driver.id === state.selectedDriverId) || null;
+  }
+
+  function selectedDriverCompletedRides() {
+    if (!state.selectedDriverId) return [];
+    return state.rides
+      .filter((ride) => ride.driverId === state.selectedDriverId && ride.status === "completed")
+      .sort((a, b) => rideCreatedTs(b) - rideCreatedTs(a));
+  }
+
+  function setLoading(text = "載入中...") {
+    qs("drivers").innerHTML = `<div class="empty">${text}</div>`;
+    qs("recent-rides").innerHTML = `<div class="empty">${text}</div>`;
+    qs("driver-detail-body").innerHTML = `<div class="empty">${text}</div>`;
+  }
+
+  function updateIdentity(user) {
+    qs("me").textContent = user ? (user.email || user.uid) : "";
+    qs("hero-user").textContent = user ? (user.email || user.uid) : "尚未登入";
+  }
+
+  function renderDashboard() {
+    const completed = state.rides.filter((ride) => ride.status === "completed").length;
+    const pending = state.rides.filter((ride) => ride.status === "pending").length;
+    const inService = state.rides.filter((ride) => ["accepted", "in_progress"].includes(ride.status)).length;
+    const sevenDaysAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
+    const last7Completed = state.rides.filter((ride) => ride.status === "completed" && rideCreatedTs(ride) >= sevenDaysAgo).length;
+
+    qs("kpi-drivers").textContent = String(state.drivers.length);
+    qs("kpi-pending").textContent = String(pending);
+    qs("kpi-active").textContent = String(inService);
+    qs("kpi-completed").textContent = String(completed);
+    qs("meta-last7").textContent = String(last7Completed);
+    qs("meta-status").textContent = state.isAdmin ? "管理員已通過" : "權限不足";
+  }
+
+  function renderDrivers() {
+    const drivers = filteredDrivers();
+    const wrap = qs("drivers");
+
+    if (!drivers.length) {
+      wrap.innerHTML = '<div class="empty">找不到符合條件的司機資料。</div>';
+      return;
+    }
+
+    wrap.innerHTML = drivers.map((driver) => {
+      const completedCount = state.rides.filter((ride) => ride.driverId === driver.id && ride.status === "completed").length;
+      const activeCount = state.rides.filter((ride) => ride.driverId === driver.id && ["accepted", "in_progress"].includes(ride.status)).length;
+      const pendingCount = state.rides.filter((ride) => ride.driverId === driver.id && ride.status === "pending").length;
+      return `
+        <article class="driver-card">
+          <div class="driver-head">
+            <div>
+              <h3>${safeText(driverLabel(driver))}</h3>
+              <div class="muted">${safeText(driver.email || driver.id)}</div>
+            </div>
+            <div class="inline-actions">
+              <button class="btn-secondary" onclick="viewCompleted('${safeText(driver.id)}')">查看完成訂單</button>
+              <button class="btn-danger" onclick="delDriver('${safeText(driver.id)}')">刪除司機</button>
+            </div>
+          </div>
+          <div class="badge-row">
+            <span class="badge">車牌：${safeText(driver.plate || "-")}</span>
+            <span class="badge">顏色：${safeText(driver.color || "-")}</span>
+          </div>
+          <div class="stats-row">
+            <div class="stat-box"><strong>完成訂單</strong><span>${completedCount}</span></div>
+            <div class="stat-box"><strong>服務中</strong><span>${activeCount}</span></div>
+            <div class="stat-box"><strong>待派訂單</strong><span>${pendingCount}</span></div>
+          </div>
+        </article>
+      `;
+    }).join("");
+  }
+
+  function renderRecentRides() {
+    const rides = filteredRecentRides();
+    const wrap = qs("recent-rides");
+
+    if (!rides.length) {
+      wrap.innerHTML = '<div class="empty">目前沒有符合篩選條件的訂單。</div>';
+      return;
+    }
+
+    wrap.innerHTML = rides.map((ride) => `
+      <article class="ride-card">
+        <div class="ride-head">
+          <div>
+            <h4>${safeText(ride.from || "-")} → ${safeText(ride.to || "-")}</h4>
+            <div class="muted">${formatDate(ride.createdAt || ride.createdAtMs)}</div>
+          </div>
+          <span class="chip ${safeText(ride.status || "pending")}">${safeText(STATUS_MAP[ride.status] || ride.status || "未知狀態")}</span>
+        </div>
+        <div class="info-grid">
+          <div class="info-box"><strong>乘客電話</strong><span>${safeText(ride.phone || "-")}</span></div>
+          <div class="info-box"><strong>訂單型態</strong><span>${safeText(MODE_MAP[ride.type] || "-")}</span></div>
+          <div class="info-box"><strong>司機 UID</strong><span>${safeText(ride.driverId || "尚未指派")}</span></div>
+          <div class="info-box"><strong>備註</strong><span>${safeText(ride.note || "無")}</span></div>
+        </div>
+      </article>
+    `).join("");
+  }
+
+  function renderDriverDetail() {
+    const driver = selectedDriver();
+    const rides = selectedDriverCompletedRides();
+
+    if (!driver) {
+      qs("driver-detail-title").textContent = "完成訂單明細";
+      qs("driver-detail-body").innerHTML = '<div class="empty">從左側司機卡片選一位司機，就會在這裡顯示完成訂單。</div>';
+      return;
+    }
+
+    qs("driver-detail-title").textContent = `${driverLabel(driver)} 的完成訂單`;
+
+    if (!rides.length) {
+      qs("driver-detail-body").innerHTML = '<div class="empty">這位司機目前沒有 completed 訂單。</div>';
+      return;
+    }
+
+    qs("driver-detail-body").innerHTML = rides.map((ride) => {
+      const duration = computeDurationMin(ride);
+      return `
+        <article class="ride-card">
+          <div class="ride-head">
+            <div>
+              <h4>${safeText(ride.from || "-")} → ${safeText(ride.to || "-")}</h4>
+              <div class="muted">建立時間：${formatDate(ride.createdAt || ride.createdAtMs)}</div>
+            </div>
+            <button class="btn-danger" onclick="delRide('${safeText(ride.id)}')">刪除訂單</button>
+          </div>
+          <div class="info-grid">
+            <div class="info-box"><strong>乘客電話</strong><span>${safeText(ride.phone || "-")}</span></div>
+            <div class="info-box"><strong>訂單型態</strong><span>${safeText(ride.type === "reservation" ? `預約單 ${ride.reservationTime || ""}` : "立即單")}</span></div>
+            <div class="info-box"><strong>乘客評分</strong><span>${renderStars(ride.rating)}</span></div>
+            <div class="info-box"><strong>收取金額</strong><span>${ride.fare ? `${safeText(ride.fare)} 元` : "未填寫"}</span></div>
+            <div class="info-box"><strong>行程時長</strong><span>${duration !== null ? `${duration} 分鐘` : "未記錄"}</span></div>
+            <div class="info-box"><strong>評論</strong><span>${safeText(ride.review || "無")}</span></div>
+          </div>
+        </article>
+      `;
+    }).join("");
+  }
+
+  function renderAll() {
+    renderDashboard();
+    renderDrivers();
+    renderRecentRides();
+    renderDriverDetail();
+  }
+
+  async function loadData() {
+    setLoading();
+    const [driverSnap, rideSnap] = await Promise.all([
+      getDocs(collection(db, "drivers")),
+      getDocs(collection(db, "rides"))
+    ]);
+
+    state.drivers = driverSnap.docs.map((item) => ({ id: item.id, ...item.data() }))
+      .sort((a, b) => driverLabel(a).localeCompare(driverLabel(b), "zh-Hant"));
+    state.rides = rideSnap.docs.map((item) => ({ id: item.id, ...item.data() }));
+
+    if (state.selectedDriverId && !state.drivers.find((driver) => driver.id === state.selectedDriverId)) {
+      state.selectedDriverId = "";
+    }
+
+    renderAll();
+  }
+
+  onAuthStateChanged(auth, async (user) => {
+    updateIdentity(user);
+
+    if (!user) {
+      qs("login-box").classList.remove("hidden");
+      qs("admin-app").classList.add("hidden");
+      qs("not-admin").classList.add("hidden");
+      return;
+    }
+
+    state.myUid = user.uid;
+    const adminDoc = await getDoc(doc(db, "admins", user.uid));
+    state.isAdmin = adminDoc.exists();
+
+    qs("login-box").classList.add("hidden");
+    qs("admin-app").classList.remove("hidden");
+    qs("not-admin").classList.toggle("hidden", state.isAdmin);
+    qs("admin-content").classList.toggle("hidden", !state.isAdmin);
+
+    if (!state.isAdmin) {
+      renderDashboard();
+      return;
+    }
+
+    await loadData();
+  });
+
+  window.login = async function() {
+    const email = qs("email").value.trim();
+    const password = qs("password").value.trim();
+    if (!email || !password) {
+      alert("請輸入 Email 與密碼");
+      return;
+    }
+
+    try {
+      await signInWithEmailAndPassword(auth, email, password);
+    } catch (error) {
+      alert(error.message);
+    }
+  };
+
+  window.logout = async function() {
+    await signOut(auth);
+  };
+
+  window.refreshData = async function() {
+    if (!state.isAdmin) return;
+    await loadData();
+  };
+
+  window.viewCompleted = function(driverId) {
+    state.selectedDriverId = driverId;
+    renderDriverDetail();
+    qs("driver-detail-panel").scrollIntoView({ behavior: "smooth", block: "start" });
+  };
+
+  window.backToOverview = function() {
+    state.selectedDriverId = "";
+    renderDriverDetail();
+  };
+
+  window.delRide = async function(rideId) {
+    if (!state.isAdmin) {
+      alert("你不是管理員");
+      return;
+    }
+
+    if (!confirm("確定要刪除這筆已完成訂單嗎？此操作無法復原。")) return;
+
+    try {
+      await deleteDoc(doc(db, "rides", rideId));
+      await loadData();
+      alert("已刪除訂單");
+    } catch (error) {
+      alert("刪除失敗：" + error.message);
+    }
+  };
+
+  window.delDriver = async function(uid) {
+    if (!state.isAdmin) {
+      alert("你不是管理員");
+      return;
+    }
+
+    if (!confirm("確定要刪除這位司機資料嗎？此操作無法復原。")) return;
+
+    try {
+      await deleteDoc(doc(db, "drivers", uid));
+      if (state.selectedDriverId === uid) {
+        state.selectedDriverId = "";
+      }
+      await loadData();
+      alert("已刪除司機資料");
+    } catch (error) {
+      alert("刪除失敗：" + error.message);
+    }
+  };
+
+  window.addEventListener("DOMContentLoaded", () => {
+    qs("driver-search").addEventListener("input", (event) => {
+      state.searchKeyword = event.target.value;
+      renderDrivers();
+    });
+
+    qs("ride-status-filter").addEventListener("change", (event) => {
+      state.statusFilter = event.target.value;
+      renderRecentRides();
+    });
+
+    renderDashboard();
+    renderDrivers();
+    renderRecentRides();
+    renderDriverDetail();
+  });
+</script>
+</head>
+<body>
+  <div class="shell">
+    <div class="topbar">
+      <div>
+        <h2>計程車管理後台</h2>
+        <div class="muted">Firebase Auth 登入，並以 `admins/{uid}` 文件判斷管理權限。</div>
+      </div>
+      <div class="topbar-actions">
+        <span class="badge">登入帳號：<span id="me"></span></span>
+        <button class="btn-secondary" onclick="refreshData()">重新整理資料</button>
+        <button class="btn-ghost" onclick="logout()">登出</button>
+      </div>
+    </div>
+
+    <section class="hero">
+      <article class="hero-card dark">
+        <span class="hero-tag">ADMIN CONSOLE</span>
+        <h1>司機管理、訂單總覽、完成單檢視</h1>
+        <div class="hero-text">把原本偏簡單的後台整理成單頁管理介面。你可以直接看司機列表、搜尋車牌、篩近期訂單，並展開單一司機的完成訂單與乘客評價。</div>
+      </article>
+      <div class="hero-side">
+        <div class="hero-card">
+          <div class="meta-label">目前登入帳號</div>
+          <div class="meta-value" id="hero-user">尚未登入</div>
+        </div>
+        <div class="hero-meta">
+          <div class="meta-box">
+            <div class="meta-label">近 7 日完成數</div>
+            <div class="meta-value" id="meta-last7">0</div>
+          </div>
+          <div class="meta-box">
+            <div class="meta-label">權限狀態</div>
+            <div class="meta-value" id="meta-status">尚未驗證</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="login-box" class="login-card hidden">
+      <div class="section-head">
+        <div>
+          <h3>管理員登入</h3>
+          <p>登入成功後，系統會再檢查 `admins/{uid}` 是否存在。</p>
+        </div>
+      </div>
+      <div class="toolbar">
+        <input id="email" placeholder="Email"/>
+        <input id="password" type="password" placeholder="密碼"/>
+        <button class="btn-primary" onclick="login()">登入後台</button>
+      </div>
+    </section>
+
+    <section id="admin-app" class="hidden">
+      <div id="not-admin" class="alert danger hidden">你已登入，但這個帳號不在管理員名單內。請到 Firestore 建立對應的 `admins/{uid}` 文件。</div>
+
+      <div id="admin-content" class="layout hidden">
+        <main class="panel">
+          <div class="section-head">
+            <div>
+              <h3>營運總覽</h3>
+              <p>快速查看司機數量、待派訂單、服務中與完成單。</p>
+            </div>
+          </div>
+
+          <div class="kpi-grid">
+            <article class="kpi brand">
+              <div class="kpi-label">司機總數</div>
+              <div class="kpi-value" id="kpi-drivers">0</div>
+            </article>
+            <article class="kpi warn">
+              <div class="kpi-label">待派訂單</div>
+              <div class="kpi-value" id="kpi-pending">0</div>
+            </article>
+            <article class="kpi info">
+              <div class="kpi-label">服務中</div>
+              <div class="kpi-value" id="kpi-active">0</div>
+            </article>
+            <article class="kpi good">
+              <div class="kpi-label">完成訂單</div>
+              <div class="kpi-value" id="kpi-completed">0</div>
+            </article>
+          </div>
+
+          <div class="section-head" style="margin-top:22px;">
+            <div>
+              <h3>司機列表</h3>
+              <p>可搜尋司機名稱、Email、車牌與顏色，並查看個別完成單。</p>
+            </div>
+          </div>
+
+          <div class="toolbar">
+            <input id="driver-search" placeholder="搜尋司機、車牌、顏色或 UID"/>
+            <select id="ride-status-filter">
+              <option value="all">近期訂單：全部狀態</option>
+              <option value="pending">等待中</option>
+              <option value="accepted">已接單</option>
+              <option value="in_progress">行程中</option>
+              <option value="completed">已完成</option>
+              <option value="canceled">已取消</option>
+            </select>
+            <button class="btn-ghost" onclick="backToOverview()">清除司機明細</button>
+          </div>
+
+          <div id="drivers" class="driver-grid">
+            <div class="empty">載入中...</div>
+          </div>
+        </main>
+
+        <aside class="panel">
+          <div class="section-head">
+            <div>
+              <h3>近期訂單</h3>
+              <p>顯示最近 10 筆訂單，可依狀態篩選。</p>
+            </div>
+          </div>
+          <div id="recent-rides" class="ride-list">
+            <div class="empty">載入中...</div>
+          </div>
+
+          <div id="driver-detail-panel" style="margin-top:22px;">
+            <div class="section-head">
+              <div>
+                <h3 id="driver-detail-title">完成訂單明細</h3>
+                <p>展開單一司機後，可檢視完成單、乘客評價與收費資料。</p>
+              </div>
+            </div>
+            <div id="driver-detail-body" class="ride-list">
+              <div class="empty">從左側司機卡片選一位司機，就會在這裡顯示完成訂單。</div>
+            </div>
+          </div>
+        </aside>
+      </div>
+    </section>
+  </div>
+</body>
+</html>

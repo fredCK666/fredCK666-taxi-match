@@ -1,0 +1,1091 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8"/>
+<title>計程車叫車平台｜乘客端</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<style>
+  :root {
+    --ink: #1f2937;
+    --muted: #6b7280;
+    --line: rgba(15, 23, 42, 0.08);
+    --surface: rgba(255, 255, 255, 0.86);
+    --surface-strong: #ffffff;
+    --brand: #ffb300;
+    --brand-deep: #f57c00;
+    --accent: #00897b;
+    --accent-soft: #e0f2f1;
+    --danger: #c62828;
+    --danger-soft: #ffebee;
+    --success: #2e7d32;
+    --success-soft: #e8f5e9;
+    --info: #1565c0;
+    --info-soft: #e3f2fd;
+    --shadow: 0 18px 48px rgba(15, 23, 42, 0.12);
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    min-height: 100vh;
+    color: var(--ink);
+    font-family: "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", sans-serif;
+    background:
+      radial-gradient(circle at top left, rgba(255, 224, 130, 0.9), transparent 32%),
+      radial-gradient(circle at top right, rgba(129, 212, 250, 0.7), transparent 26%),
+      linear-gradient(160deg, #fffef7 0%, #fff8e1 42%, #ffe0b2 100%);
+    padding: 12px;
+  }
+
+  a { color: inherit; }
+
+  button, input, textarea, select {
+    font: inherit;
+  }
+
+  .shell {
+    width: min(100%, 430px);
+    margin: 0 auto;
+  }
+
+  .hero {
+    position: relative;
+    overflow: hidden;
+    padding: 28px;
+    border-radius: 28px;
+    background: linear-gradient(135deg, rgba(36, 36, 36, 0.96), rgba(76, 52, 0, 0.92));
+    color: #fffdf5;
+    box-shadow: var(--shadow);
+  }
+
+  .hero::after {
+    content: "";
+    position: absolute;
+    inset: auto -120px -120px auto;
+    width: 280px;
+    height: 280px;
+    border-radius: 50%;
+    background: rgba(255, 202, 40, 0.18);
+    filter: blur(8px);
+  }
+
+  .hero-top,
+  .hero-bottom,
+  .grid,
+  .actions,
+  .mode-grid,
+  .double {
+    display: grid;
+    gap: 16px;
+  }
+
+  .hero-top {
+    grid-template-columns: 1fr;
+    align-items: start;
+  }
+
+  .brand-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.12);
+    font-size: 13px;
+    letter-spacing: 0.08em;
+  }
+
+  .hero h1 {
+    margin: 14px 0 10px;
+    font-size: clamp(30px, 5vw, 44px);
+    line-height: 1.08;
+  }
+
+  .hero p {
+    margin: 0;
+    max-width: 560px;
+    color: rgba(255, 253, 245, 0.82);
+    line-height: 1.7;
+  }
+
+  .hero-stats,
+  .grid {
+    grid-template-columns: 1fr;
+  }
+
+  .glass,
+  .panel,
+  .card,
+  .history-card {
+    backdrop-filter: blur(12px);
+  }
+
+  .glass {
+    padding: 18px;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 22px;
+    background: rgba(255, 255, 255, 0.08);
+  }
+
+  .metric-label {
+    font-size: 13px;
+    color: rgba(255, 253, 245, 0.68);
+  }
+
+  .metric-value {
+    margin-top: 8px;
+    font-size: 26px;
+    font-weight: 800;
+  }
+
+  .hero-bottom {
+    margin-top: 22px;
+    grid-template-columns: 1fr;
+  }
+
+  .layout {
+    margin-top: 18px;
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 18px;
+  }
+
+  .panel,
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 24px;
+    box-shadow: var(--shadow);
+  }
+
+  .panel {
+    padding: 22px;
+  }
+
+  .section-title {
+    margin: 0 0 8px;
+    font-size: 24px;
+  }
+
+  .section-note,
+  .hint,
+  .muted {
+    color: var(--muted);
+    font-size: 14px;
+    line-height: 1.7;
+  }
+
+  .card {
+    padding: 18px;
+  }
+
+  .card-title {
+    margin: 0 0 6px;
+    font-size: 17px;
+  }
+
+  .grid {
+    margin-top: 18px;
+  }
+
+  .mini-value {
+    margin-top: 12px;
+    font-size: 28px;
+    font-weight: 800;
+    color: var(--brand-deep);
+  }
+
+  .mode-grid {
+    margin-top: 18px;
+    grid-template-columns: 1fr;
+  }
+
+  .mode-card {
+    padding: 18px;
+    border: 1px solid var(--line);
+    border-radius: 20px;
+    background: var(--surface-strong);
+  }
+
+  .mode-card strong {
+    display: block;
+    font-size: 18px;
+    margin-bottom: 10px;
+  }
+
+  .mode-card p {
+    margin: 0 0 14px;
+    color: var(--muted);
+    line-height: 1.7;
+  }
+
+  .mode-badge,
+  .status-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 7px 12px;
+    border-radius: 999px;
+    font-size: 13px;
+    font-weight: 700;
+  }
+
+  .mode-badge {
+    background: rgba(255, 179, 0, 0.16);
+    color: #9a6100;
+  }
+
+  .status-chip {
+    background: var(--info-soft);
+    color: var(--info);
+  }
+
+  .double {
+    grid-template-columns: 1fr;
+  }
+
+  label {
+    display: block;
+    margin: 16px 0 6px;
+    font-size: 14px;
+    font-weight: 700;
+  }
+
+  input,
+  textarea,
+  select {
+    width: 100%;
+    min-height: 48px;
+    padding: 14px 15px;
+    border: 1px solid rgba(15, 23, 42, 0.12);
+    border-radius: 16px;
+    background: #fff;
+    color: var(--ink);
+  }
+
+  input:focus,
+  textarea:focus {
+    outline: none;
+    border-color: rgba(245, 124, 0, 0.5);
+    box-shadow: 0 0 0 4px rgba(255, 179, 0, 0.16);
+  }
+
+  textarea {
+    min-height: 98px;
+    resize: vertical;
+  }
+
+  .actions {
+    margin-top: 18px;
+    grid-template-columns: 1fr;
+  }
+
+  button {
+    width: 100%;
+    border: 0;
+    border-radius: 16px;
+    min-height: 50px;
+    padding: 14px 16px;
+    font-weight: 800;
+    cursor: pointer;
+    transition: transform 0.14s ease, opacity 0.14s ease, box-shadow 0.14s ease;
+  }
+
+  button:hover {
+    transform: translateY(-1px);
+  }
+
+  button:active {
+    transform: translateY(1px);
+  }
+
+  .btn-primary {
+    color: #231600;
+    background: linear-gradient(135deg, #ffd54f, #ffb300);
+    box-shadow: 0 10px 24px rgba(255, 179, 0, 0.24);
+  }
+
+  .btn-secondary {
+    color: #004d40;
+    background: linear-gradient(135deg, #b2dfdb, #80cbc4);
+  }
+
+  .btn-ghost {
+    color: var(--ink);
+    background: #fff;
+    border: 1px solid rgba(15, 23, 42, 0.12);
+  }
+
+  .btn-danger {
+    color: var(--danger);
+    background: var(--danger-soft);
+  }
+
+  .status-card {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    padding: 18px;
+    border-radius: 20px;
+    background: linear-gradient(180deg, rgba(255, 248, 225, 0.9), rgba(255, 255, 255, 0.95));
+    border: 1px solid rgba(255, 179, 0, 0.22);
+  }
+
+  .timeline {
+    display: grid;
+    gap: 12px;
+  }
+
+  .timeline-item {
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+  }
+
+  .timeline-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: var(--brand-deep);
+    margin-top: 7px;
+    box-shadow: 0 0 0 6px rgba(255, 179, 0, 0.16);
+  }
+
+  .driver-box {
+    padding: 16px;
+    border-radius: 18px;
+    background: var(--accent-soft);
+    color: #0f4f48;
+  }
+
+  .info-list {
+    display: grid;
+    gap: 10px;
+    margin-top: 12px;
+  }
+
+  .info-item {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 12px 14px;
+    border-radius: 16px;
+    background: rgba(255, 255, 255, 0.8);
+    border: 1px solid rgba(15, 23, 42, 0.06);
+  }
+
+  .info-item span:last-child {
+    text-align: right;
+    font-weight: 700;
+  }
+
+  .stars {
+    display: flex;
+    gap: 8px;
+    margin: 14px 0 10px;
+  }
+
+  .star {
+    font-size: 30px;
+    cursor: pointer;
+    filter: grayscale(100%);
+    opacity: 0.45;
+    transition: transform 0.12s ease, opacity 0.12s ease, filter 0.12s ease;
+  }
+
+  .star.active {
+    filter: none;
+    opacity: 1;
+    transform: translateY(-1px);
+  }
+
+  .history-wrap {
+    display: grid;
+    gap: 14px;
+    margin-top: 16px;
+  }
+
+  .history-card {
+    padding: 16px;
+    border-radius: 18px;
+    background: #fff;
+    border: 1px solid rgba(15, 23, 42, 0.08);
+    box-shadow: 0 10px 22px rgba(15, 23, 42, 0.06);
+  }
+
+  .history-top {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    align-items: center;
+    margin-bottom: 10px;
+  }
+
+  .empty {
+    padding: 18px;
+    border-radius: 18px;
+    background: rgba(255, 255, 255, 0.64);
+    border: 1px dashed rgba(15, 23, 42, 0.14);
+    color: var(--muted);
+  }
+
+  .aside-stack {
+    display: grid;
+    gap: 18px;
+  }
+
+  .support {
+    background: linear-gradient(135deg, rgba(255, 179, 0, 0.14), rgba(21, 101, 192, 0.12));
+  }
+
+  .support a {
+    text-decoration: none;
+    font-weight: 800;
+  }
+
+  .pill-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 14px;
+  }
+
+  .pill {
+    padding: 9px 12px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.8);
+    border: 1px solid rgba(15, 23, 42, 0.08);
+    font-size: 13px;
+    font-weight: 700;
+  }
+
+  .hidden { display: none !important; }
+
+  @media (max-width: 720px) {
+    .hero, .panel, .card { border-radius: 22px; }
+    .history-top,
+    .info-item {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+  }
+</style>
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+  import { getFirestore, addDoc, collection, doc, onSnapshot, updateDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+  import { getAuth, signInAnonymously, setPersistence, inMemoryPersistence, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyBOd-dnst84kBMLSkaC0NrQ-k_1NOOeCEE",
+    authDomain: "fred-54182.firebaseapp.com",
+    projectId: "fred-54182",
+    storageBucket: "fred-54182.appspot.com",
+    messagingSenderId: "110991560461",
+    appId: "1:110991560461:web:147689b76260547e6aaa44"
+  };
+
+  const STATUS_LABELS = {
+    pending: "等待派車中",
+    accepted: "司機已接單",
+    in_progress: "行程進行中",
+    completed: "已抵達目的地",
+    canceled: "叫車已取消"
+  };
+
+  const MODE_LABELS = {
+    immediate: "立即叫車",
+    reservation: "預約叫車"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
+  const auth = getAuth(app);
+
+  let currentRideId = "";
+  let currentRideData = null;
+  let isSubmitting = false;
+  let pickedStars = 0;
+  let unsubscribeRide = null;
+
+  const qs = (id) => document.getElementById(id);
+  const formatStatus = (status) => STATUS_LABELS[status] || status || "尚未建立";
+
+  function getSavedPhone() {
+    return localStorage.getItem("savedPhone") || "";
+  }
+
+  function historyKey(phone) {
+    return "history_" + phone;
+  }
+
+  function getHistory(phone) {
+    return JSON.parse(localStorage.getItem(historyKey(phone)) || "[]");
+  }
+
+  function saveHistory(phone, records) {
+    localStorage.setItem(historyKey(phone), JSON.stringify(records));
+  }
+
+  function renderSummary() {
+    const phone = getSavedPhone();
+    const records = phone ? getHistory(phone) : [];
+    const completedCount = records.length;
+    const reservationCount = records.filter((item) => item.mode === "reservation").length;
+    const immediateCount = records.filter((item) => item.mode === "immediate").length;
+
+    qs("summary-phone").textContent = phone || "尚未登入";
+    qs("summary-total").textContent = String(completedCount);
+    qs("summary-reservation").textContent = String(reservationCount);
+    qs("summary-immediate").textContent = String(immediateCount);
+  }
+
+  function setLoggedIn(loggedIn) {
+    qs("login-section").classList.toggle("hidden", loggedIn);
+    qs("main-section").classList.toggle("hidden", !loggedIn);
+    if (loggedIn) {
+      qs("phone").value = getSavedPhone();
+      qs("welcome-phone").textContent = getSavedPhone();
+    }
+    renderSummary();
+  }
+
+  function showSection(section) {
+    qs("mode-selection").classList.toggle("hidden", section !== "mode");
+    qs("form").classList.toggle("hidden", section !== "form");
+    qs("status").classList.toggle("hidden", section !== "status");
+  }
+
+  function updateModeBanner(mode) {
+    qs("current-mode-label").textContent = MODE_LABELS[mode] || "未選擇";
+    qs("mode").value = mode;
+    qs("time-section").classList.toggle("hidden", mode !== "reservation");
+    qs("time").required = mode === "reservation";
+  }
+
+  function renderRideStatus(data) {
+    currentRideData = data;
+    qs("ride-status-chip").textContent = formatStatus(data.status);
+    qs("ride-route-from").textContent = data.from || "-";
+    qs("ride-route-to").textContent = data.to || "-";
+    qs("ride-mode").textContent = MODE_LABELS[data.type] || "未指定";
+    qs("ride-note").textContent = data.note || "無備註";
+    qs("ride-time").textContent = data.reservationTime || "立即出發";
+
+    const cancelBtn = qs("cancel-btn");
+    const driverInfo = qs("driver-info");
+    const ratingForm = qs("rating-form");
+
+    if (data.status === "accepted" || data.status === "in_progress") {
+      const plate = data.plate || "司機尚未提供";
+      const color = data.color || "司機尚未提供";
+      driverInfo.innerHTML = `
+        <strong>司機資訊已更新</strong>
+        <div class="info-list">
+          <div class="info-item"><span>車牌號碼</span><span>${plate}</span></div>
+          <div class="info-item"><span>車身顏色</span><span>${color}</span></div>
+        </div>
+      `;
+      driverInfo.classList.remove("hidden");
+    } else {
+      driverInfo.classList.add("hidden");
+    }
+
+    const canCancel = ["pending", "accepted"].includes(data.status);
+    cancelBtn.classList.toggle("hidden", !canCancel);
+
+    if (data.status === "completed") {
+      ratingForm.classList.remove("hidden");
+    } else {
+      ratingForm.classList.add("hidden");
+    }
+  }
+
+  function renderHistory() {
+    const phone = getSavedPhone();
+    const wrap = qs("history");
+    if (!phone) {
+      wrap.innerHTML = '<div class="empty">請先登入手機號碼。</div>';
+      return;
+    }
+
+    const records = getHistory(phone);
+    if (!records.length) {
+      wrap.innerHTML = '<div class="empty">尚無叫車紀錄，送出第一筆行程後會顯示在這裡。</div>';
+      return;
+    }
+
+    wrap.innerHTML = `
+      <div class="history-wrap">
+        ${records.slice().reverse().map((record, reverseIndex) => {
+          const originalIndex = records.length - 1 - reverseIndex;
+          return `
+            <article class="history-card">
+              <div class="history-top">
+                <strong>${MODE_LABELS[record.mode] || "叫車紀錄"}</strong>
+                <span class="mode-badge">${record.time}</span>
+              </div>
+              <div class="info-list">
+                <div class="info-item"><span>上車地點</span><span>${record.from}</span></div>
+                <div class="info-item"><span>目的地</span><span>${record.to}</span></div>
+                <div class="info-item"><span>手機號碼</span><span>${record.phone}</span></div>
+                <div class="info-item"><span>建立時間</span><span>${record.createdAt}</span></div>
+                <div class="info-item"><span>備註</span><span>${record.note || "無"}</span></div>
+              </div>
+              <div class="actions" style="margin-top:14px; grid-template-columns: 1fr;">
+                <button class="btn-ghost" onclick="deleteHistory(${originalIndex})">刪除此筆紀錄</button>
+              </div>
+            </article>
+          `;
+        }).join("")}
+      </div>
+    `;
+  }
+
+  function resetStars() {
+    pickedStars = 0;
+    document.querySelectorAll(".star").forEach((star) => star.classList.remove("active"));
+  }
+
+  function resetToForm() {
+    if (unsubscribeRide) {
+      unsubscribeRide();
+      unsubscribeRide = null;
+    }
+    currentRideId = "";
+    currentRideData = null;
+    ["from", "to", "time", "note", "fare", "review"].forEach((id) => {
+      qs(id).value = "";
+    });
+    updateModeBanner("immediate");
+    resetStars();
+    showSection("mode");
+    renderSummary();
+    renderHistory();
+  }
+
+  window.login = () => {
+    const phone = qs("login-phone").value.trim();
+    if (!phone) {
+      alert("請輸入手機號碼");
+      return;
+    }
+    localStorage.setItem("savedPhone", phone);
+    setLoggedIn(true);
+  };
+
+  window.logoutPassenger = () => {
+    localStorage.removeItem("savedPhone");
+    qs("login-phone").value = "";
+    resetToForm();
+    setLoggedIn(false);
+  };
+
+  window.selectMode = (mode) => {
+    updateModeBanner(mode);
+    showSection("form");
+    renderHistory();
+  };
+
+  window.backToModeSelection = () => {
+    showSection("mode");
+  };
+
+  async function requestRide() {
+    if (isSubmitting) return;
+    isSubmitting = true;
+    setTimeout(() => {
+      isSubmitting = false;
+    }, 2500);
+
+    const user = auth.currentUser;
+    if (!user || !user.isAnonymous) {
+      try {
+        if (user && !user.isAnonymous) await signOut(auth);
+      } catch (error) {
+        console.error(error);
+      }
+      try {
+        await signInAnonymously(auth);
+      } catch (error) {
+        console.error(error);
+      }
+      alert("系統已切換為匿名模式，請再按一次送出叫車");
+      return;
+    }
+
+    const phone = getSavedPhone();
+    const from = qs("from").value.trim();
+    const to = qs("to").value.trim();
+    const note = qs("note").value.trim();
+    const time = qs("time").value.trim();
+    const mode = qs("mode").value;
+
+    if (!phone || !from || !to) {
+      alert("請輸入完整資料");
+      return;
+    }
+
+    if (mode === "reservation" && !time) {
+      alert("請選擇預約時間");
+      return;
+    }
+
+    const records = getHistory(phone);
+    records.push({
+      phone,
+      from,
+      to,
+      note,
+      mode,
+      time: mode === "reservation" ? time : "立即出發",
+      createdAt: new Date().toLocaleString()
+    });
+    saveHistory(phone, records);
+
+    const payload = {
+      userId: user.uid,
+      phone,
+      from,
+      to,
+      note,
+      status: "pending",
+      createdAt: serverTimestamp(),
+      createdAtMs: Date.now(),
+      type: mode
+    };
+
+    if (mode === "reservation") {
+      payload.reservationTime = time;
+    }
+
+    const ref = await addDoc(collection(db, "rides"), payload);
+    currentRideId = ref.id;
+    qs("ride-id").textContent = ref.id;
+    showSection("status");
+    renderHistory();
+    listenToRide();
+  }
+  window.requestRide = requestRide;
+
+  function listenToRide() {
+    if (unsubscribeRide) unsubscribeRide();
+    const rideRef = doc(db, "rides", currentRideId);
+    unsubscribeRide = onSnapshot(rideRef, (snap) => {
+      const data = snap.data();
+      if (!data) return;
+      renderRideStatus(data);
+    });
+  }
+
+  window.cancelRide = async () => {
+    if (!currentRideId) return;
+    if (!confirm("確定要取消叫車嗎？")) return;
+    await updateDoc(doc(db, "rides", currentRideId), { status: "canceled" });
+    alert("已取消叫車");
+    resetToForm();
+  };
+
+  function setStars(count) {
+    pickedStars = count;
+    document.querySelectorAll(".star").forEach((star, index) => {
+      star.classList.toggle("active", index < count);
+    });
+  }
+
+  window.starEnter = (index) => setStars(index);
+  window.starClick = (index) => setStars(index);
+
+  window.submitRating = async () => {
+    if (!currentRideId) return;
+    if (!pickedStars) {
+      alert("請點選星星評分");
+      return;
+    }
+
+    const fare = qs("fare").value.trim();
+    const review = qs("review").value.trim();
+
+    await updateDoc(doc(db, "rides", currentRideId), {
+      rating: pickedStars,
+      review,
+      fare: fare ? Number(fare) : null,
+      ratingSubmittedAt: serverTimestamp()
+    });
+
+    alert("已送出評價，感謝您的回饋");
+    resetToForm();
+  };
+
+  window.showHistory = () => {
+    renderHistory();
+    qs("history-panel").scrollIntoView({ behavior: "smooth", block: "start" });
+  };
+
+  window.deleteHistory = (index) => {
+    const phone = getSavedPhone();
+    const records = getHistory(phone);
+    if (!records[index]) return;
+    if (!confirm("確定要刪除此筆紀錄嗎？")) return;
+    records.splice(index, 1);
+    saveHistory(phone, records);
+    renderSummary();
+    renderHistory();
+  };
+
+  await setPersistence(auth, inMemoryPersistence);
+  onAuthStateChanged(auth, async (user) => {
+    try {
+      if (!user) {
+        await signInAnonymously(auth);
+      } else if (!user.isAnonymous) {
+        await signOut(auth);
+        await signInAnonymously(auth);
+      }
+    } catch (error) {
+      alert("登入服務發生問題，請稍後再試");
+      console.error(error);
+    }
+  });
+
+  window.addEventListener("DOMContentLoaded", () => {
+    const phone = getSavedPhone();
+    if (phone) {
+      qs("login-phone").value = phone;
+      setLoggedIn(true);
+    } else {
+      setLoggedIn(false);
+    }
+    updateModeBanner("immediate");
+    showSection("mode");
+    renderHistory();
+  });
+</script>
+</head>
+<body>
+  <div class="shell">
+    <section class="hero">
+      <div class="hero-top">
+        <div>
+          <span class="brand-tag">計程車 PASSENGER</span>
+          <h1>乘客端叫車平台</h1>
+          <p>從立即叫車、預約接送到行程完成評價，全部集中在同一個頁面。你只需要輸入手機與上下車地點，就能快速送出叫車需求。</p>
+        </div>
+        <div class="glass hero-stats">
+          <div>
+            <div class="metric-label">客服專線</div>
+            <div class="metric-value">0968-551-168</div>
+          </div>
+          <div>
+            <div class="metric-label">服務區域</div>
+            <div class="metric-value">斗六</div>
+          </div>
+          <div>
+            <div class="metric-label">支援模式</div>
+            <div class="metric-value">即時 / 預約</div>
+          </div>
+        </div>
+      </div>
+      <div class="hero-bottom">
+        <div class="glass">
+          <div class="metric-label">目前登入手機</div>
+          <div class="metric-value" id="summary-phone">尚未登入</div>
+        </div>
+        <div class="glass">
+          <div class="metric-label">乘車提醒</div>
+          <div style="margin-top:8px; line-height:1.8; color:rgba(255,253,245,0.82);">司機接單後，車牌與車色會在行程卡片即時更新。</div>
+        </div>
+      </div>
+    </section>
+
+    <div class="layout">
+      <main class="panel">
+        <h2 class="section-title">立即叫車 / 預約接送</h2>
+        <div class="section-note">保留原本 Firebase 叫車流程，重新整理成較完整的乘客端操作畫面。</div>
+
+        <div class="grid">
+          <article class="card">
+            <h3 class="card-title">累積叫車筆數</h3>
+            <div class="mini-value" id="summary-total">0</div>
+          </article>
+          <article class="card">
+            <h3 class="card-title">預約叫車</h3>
+            <div class="mini-value" id="summary-reservation">0</div>
+          </article>
+          <article class="card">
+            <h3 class="card-title">立即叫車</h3>
+            <div class="mini-value" id="summary-immediate">0</div>
+          </article>
+        </div>
+
+        <section id="login-section" style="margin-top:20px;">
+          <label for="login-phone">手機號碼登入</label>
+          <input id="login-phone" placeholder="例如：0912-345-678"/>
+          <div class="actions">
+            <button class="btn-primary" onclick="login()">登入乘客端</button>
+            <button class="btn-ghost" onclick="showHistory()">查看歷史紀錄</button>
+            <button class="btn-secondary" onclick="window.open('tel:0968551168', '_self')">直接撥打客服</button>
+          </div>
+        </section>
+
+        <section id="main-section" class="hidden" style="margin-top:20px;">
+          <div class="card">
+            <div class="history-top">
+              <div>
+                <h3 class="card-title" style="margin-bottom:4px;">歡迎回來</h3>
+                <div class="muted">目前登入手機：<strong id="welcome-phone"></strong></div>
+              </div>
+              <button class="btn-ghost" style="width:auto;" onclick="logoutPassenger()">登出</button>
+            </div>
+          </div>
+
+          <section id="mode-selection" style="margin-top:18px;">
+            <div class="mode-grid">
+              <article class="mode-card">
+                <span class="mode-badge">推薦給馬上出發的乘客</span>
+                <strong>立即叫車</strong>
+                <p>送出後立即進入派車流程，適合通勤、返家或短程接送。</p>
+                <button class="btn-primary" onclick="selectMode('immediate')">選擇立即叫車</button>
+              </article>
+              <article class="mode-card">
+                <span class="mode-badge">適合排程接送</span>
+                <strong>預約叫車</strong>
+                <p>可先填好上車時間，適合就醫、車站接送或固定排班通勤。</p>
+                <button class="btn-secondary" onclick="selectMode('reservation')">選擇預約叫車</button>
+              </article>
+            </div>
+          </section>
+
+          <section id="form" class="hidden" style="margin-top:18px;">
+            <div class="history-top">
+              <div>
+                <h3 class="card-title" style="margin-bottom:4px;">填寫叫車資料</h3>
+                <div class="muted">目前模式：<span id="current-mode-label">立即叫車</span></div>
+              </div>
+              <button class="btn-ghost" style="width:auto;" onclick="backToModeSelection()">返回模式選擇</button>
+            </div>
+
+            <input id="phone" type="hidden"/>
+            <input id="mode" type="hidden" value="immediate"/>
+
+            <div class="double">
+              <div>
+                <label for="from">上車地點</label>
+                <input id="from" placeholder="請輸入起點地址"/>
+              </div>
+              <div>
+                <label for="to">目的地</label>
+                <input id="to" placeholder="請輸入終點地址"/>
+              </div>
+            </div>
+
+            <div id="time-section" class="hidden">
+              <label for="time">預約時間</label>
+              <input id="time" type="datetime-local"/>
+            </div>
+
+            <label for="note">備註</label>
+            <textarea id="note" placeholder="例如：需搬行李、長者同行、希望後車廂空間較大"></textarea>
+
+            <div class="actions">
+              <button class="btn-primary" onclick="requestRide()">送出叫車</button>
+              <button class="btn-secondary" onclick="showHistory()">查看歷史紀錄</button>
+              <button class="btn-ghost" onclick="backToModeSelection()">稍後再填</button>
+            </div>
+          </section>
+
+          <section id="status" class="hidden" style="margin-top:18px;">
+            <div class="status-card">
+              <div class="history-top">
+                <div>
+                  <h3 class="card-title" style="margin-bottom:4px;">目前行程</h3>
+                  <div class="muted">訂單編號：<span id="ride-id">-</span></div>
+                </div>
+                <span class="status-chip" id="ride-status-chip">等待派車中</span>
+              </div>
+
+              <div class="timeline">
+                <div class="timeline-item">
+                  <span class="timeline-dot"></span>
+                  <div>
+                    <strong>上車地點</strong>
+                    <div class="muted" id="ride-route-from">-</div>
+                  </div>
+                </div>
+                <div class="timeline-item">
+                  <span class="timeline-dot"></span>
+                  <div>
+                    <strong>目的地</strong>
+                    <div class="muted" id="ride-route-to">-</div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="info-list">
+                <div class="info-item"><span>叫車模式</span><span id="ride-mode">-</span></div>
+                <div class="info-item"><span>預約時間</span><span id="ride-time">立即出發</span></div>
+                <div class="info-item"><span>乘客備註</span><span id="ride-note">無備註</span></div>
+              </div>
+
+              <div id="driver-info" class="driver-box hidden"></div>
+
+              <div class="actions" style="grid-template-columns: 1fr;">
+                <button id="cancel-btn" class="btn-danger hidden" onclick="cancelRide()">取消叫車</button>
+                <button class="btn-ghost" onclick="showHistory()">查看歷史紀錄</button>
+              </div>
+            </div>
+
+            <div id="rating-form" class="card hidden" style="margin-top:16px;">
+              <h3 class="card-title">行程已完成，請留下評價</h3>
+              <div class="hint">完成後可記錄司機收費與乘車體驗，方便後續服務優化。</div>
+              <div class="stars" aria-label="星等評分">
+                <span class="star" onmouseenter="starEnter(1)" onclick="starClick(1)">⭐</span>
+                <span class="star" onmouseenter="starEnter(2)" onclick="starClick(2)">⭐</span>
+                <span class="star" onmouseenter="starEnter(3)" onclick="starClick(3)">⭐</span>
+                <span class="star" onmouseenter="starEnter(4)" onclick="starClick(4)">⭐</span>
+                <span class="star" onmouseenter="starEnter(5)" onclick="starClick(5)">⭐</span>
+              </div>
+              <div class="double">
+                <div>
+                  <label for="fare">司機收取金額</label>
+                  <input id="fare" type="number" placeholder="輸入金額（元）"/>
+                </div>
+                <div>
+                  <label for="review">乘客評語</label>
+                  <textarea id="review" placeholder="例如：司機準時、車內整潔、服務親切"></textarea>
+                </div>
+              </div>
+              <div class="actions" style="grid-template-columns: 1fr;">
+                <button class="btn-primary" onclick="submitRating()">送出評價</button>
+              </div>
+            </div>
+          </section>
+        </section>
+      </main>
+
+      <aside class="aside-stack">
+        <section class="card support">
+          <h3 class="card-title">聯絡資訊</h3>
+          <div class="hint">需要人工協助時，可直接撥打車行電話。</div>
+          <div class="pill-row">
+            <span class="pill">斗六計程車</span>
+            <span class="pill">全年接送</span>
+            <span class="pill">匿名登入</span>
+          </div>
+          <div class="info-list">
+            <div class="info-item"><span>客服電話</span><span><a href="tel:0968551168">0968-551-168</a></span></div>
+            <div class="info-item"><span>地址</span><span>雲林縣斗六市大學路一段 550 號</span></div>
+            <div class="info-item"><span>地圖</span><span><a target="_blank" href="https://www.google.com/maps/place/%E6%96%97%E5%85%AD+TAXI%E3%80%8E%E9%A0%86%E9%A2%A8%E8%A8%88%E7%A8%8B%E8%BB%8A%E3%80%8F/@23.703793,120.5539116,17.25z">開啟 Google 地圖</a></span></div>
+          </div>
+        </section>
+
+        <section id="history-panel" class="card">
+          <h3 class="card-title">歷史叫車紀錄</h3>
+          <div class="hint">資料儲存在本機瀏覽器，可快速回看自己過去建立的需求。</div>
+          <div id="history" style="margin-top:14px;"></div>
+        </section>
+      </aside>
+    </div>
+  </div>
+</body>
+</html>

@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <title>計程車司機端</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>
+    :root { --pri:#009688; --bg:#f5f7fa; --card:#fff; --muted:#666; --danger:#c62828; }
+    * { box-sizing: border-box; }
+    body { margin:0; font-family: "Noto Sans TC", system-ui, -apple-system, "Segoe UI", Roboto, "Microsoft JhengHei", sans-serif; padding: 14px; background: var(--bg); }
+    .container { width:min(100%, 430px); margin: 0 auto; background: var(--card); padding: 18px; border-radius: 20px; box-shadow: 0 6px 18px rgba(0,0,0,.08); }
+    h2 { margin: 0 0 8px; }
+    input, button { min-height: 48px; padding: 12px 14px; margin-top: 10px; font-size: 16px; width: 100%; border-radius: 14px; border: 1px solid #e0e0e0; }
+    button { background: var(--pri); color:#fff; border:none; cursor: pointer; font-weight:700; box-shadow: 0 2px 6px rgba(0,0,0,.12); }
+    button.ghost { background:#fff; color:#333; border:1px solid #ddd; box-shadow:none; }
+    .info { margin-top: 12px; background: #f8f8f8; padding: 12px; border-radius: 12px; }
+    .ride { border: 1px solid #eee; padding: 14px; border-radius: 16px; margin-top: 12px; box-shadow: 0 2px 6px rgba(0,0,0,.06); border-left:4px solid var(--pri); background:#fff; }
+    .tabs { display:flex; flex-direction: column; gap:8px; margin-top: 18px; }
+    .tab-button { flex:1; padding: 12px 14px; background: #e0e0e0; cursor: pointer; border: none; border-radius: 14px; }
+    .tab-button.active { background: var(--pri); color: white; }
+    .section { display: none; margin-top: 12px; }
+    .section.active { display: block; }
+    .subheader { margin-top: 16px; font-weight: 800; }
+    .row-actions a, .row-actions button { display:block; margin-top:8px; width:100%; }
+    .pill { display:inline-block; padding: 4px 10px; border-radius: 999px; background:#f1f1f1; font-size:12px; margin-left:6px; }
+  </style>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+    import {
+      getFirestore, doc, setDoc, getDoc, updateDoc,
+      collection, query, onSnapshot, serverTimestamp,
+      where
+    } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+    import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged, setPersistence, inMemoryPersistence } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyBOd-dnst84kBMLSkaC0NrQ-k_1NOOeCEE",
+      authDomain: "fred-54182.firebaseapp.com",
+      projectId: "fred-54182",
+      storageBucket: "fred-54182.appspot.com",
+      messagingSenderId: "110991560461",
+      appId: "1:110991560461:web:147689b76260547e6aaa44"
+    };
+
+    const STATUS_MAP = { pending:"等待中", accepted:"已接單", in_progress:"行程中", completed:"已完成", canceled:"已取消" };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const auth = getAuth(app);
+    setPersistence(auth, inMemoryPersistence).catch(()=>{});
+
+    let plate = "", color = "";
+
+    onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        document.getElementById("auth-choice").style.display = "none";
+        document.getElementById("login").style.display = "none";
+        document.getElementById("register").style.display = "none";
+        document.getElementById("app").style.display = "block";
+
+        const profileSnap = await getDoc(doc(db, "drivers", user.uid));
+        if (profileSnap.exists()) {
+          const data = profileSnap.data();
+          const name = data.name || "（未設定姓名）";
+          plate = data.plate || "";
+          color = data.color || "";
+          document.getElementById("driver-name").innerText = `👤 司機：${name}`;
+          document.getElementById("plate-color").innerText = `🚘 車牌：${plate}｜顏色：${color}`;
+        } else {
+          document.getElementById("plate-input").style.display = "block";
+        }
+        watchRides();
+      } else {
+        document.getElementById("app").style.display = "none";
+        document.getElementById("plate-input").style.display = "none";
+        document.getElementById("auth-choice").style.display = "block";
+      }
+    });
+
+    window.showLogin = function () {
+      document.getElementById("auth-choice").style.display = "none";
+      document.getElementById("login").style.display = "block";
+    };
+    window.showRegister = function () {
+      document.getElementById("auth-choice").style.display = "none";
+      document.getElementById("register").style.display = "block";
+    };
+
+    async function register() {
+      const name = document.getElementById("reg-name").value.trim();
+      const email = document.getElementById("reg-email").value.trim();
+      const password = document.getElementById("reg-password").value.trim();
+      if (!name || !email || !password) return alert("請輸入姓名、Email 與密碼");
+      const cred = await createUserWithEmailAndPassword(auth, email, password);
+      await setDoc(doc(db, "drivers", cred.user.uid), { name }, { merge: true });
+      document.getElementById("register").style.display = "none";
+      document.getElementById("plate-input").style.display = "block";
+    }
+    async function login() {
+      const email = document.getElementById("email").value.trim();
+      const pwd = document.getElementById("password").value.trim();
+      if (!email || !pwd) return alert("請輸入 Email 與密碼");
+      await signInWithEmailAndPassword(auth, email, pwd);
+    }
+    window.register = register;
+    window.login = login;
+
+    window.goBack = function () {
+      document.getElementById("login").style.display = "none";
+      document.getElementById("register").style.display = "none";
+      document.getElementById("auth-choice").style.display = "block";
+    };
+
+    window.logout = async function () {
+      await signOut(auth);
+      plate = "";
+      color = "";
+    };
+
+    async function savePlateColor() {
+      const user = auth.currentUser;
+      if (!user) return alert("尚未登入");
+      plate = document.getElementById("plate").value.trim();
+      color = document.getElementById("color").value.trim();
+      if (!plate || !color) return alert("請輸入車牌與顏色");
+      await setDoc(doc(db, "drivers", user.uid), { plate, color }, { merge: true });
+      document.getElementById("plate-color").innerText = `🚘 車牌：${plate}｜顏色：${color}`;
+      document.getElementById("plate-input").style.display = "none";
+    }
+    window.savePlateColor = savePlateColor;
+
+    async function updateRideStatus(rideId, newStatus) {
+      const user = auth.currentUser;
+      if (!user) return alert("尚未登入");
+      const rideRef = doc(db, "rides", rideId);
+      const payload = {};
+      if (newStatus === "accepted") {
+        payload.status = "accepted";
+        payload.driverId = user.uid;
+        payload.driverEmail = user.email || "";
+        if (plate) payload.plate = plate;
+        if (color) payload.color = color;
+      }
+      if (newStatus === "in_progress") {
+        payload.status = "in_progress";
+        payload.startedAt = serverTimestamp();
+      }
+      if (newStatus === "completed") {
+        payload.status = "completed";
+        payload.completedAt = serverTimestamp();
+      }
+      await updateDoc(rideRef, payload);
+      if (newStatus === "completed") alert("行程已完成，請提醒乘客於乘客端完成評價。");
+    }
+    window.acceptRide = async (id) => await updateRideStatus(id, "accepted");
+    window.startRide = async (id) => await updateRideStatus(id, "in_progress");
+    window.completeRide = async (id) => await updateRideStatus(id, "completed");
+
+    function watchRides() {
+      const user = auth.currentUser;
+      if (!user) return;
+
+      const pendingDiv = document.getElementById("pending-rides");
+      const myActiveDiv = document.getElementById("my-active-rides");
+      const completedDiv = document.getElementById("completed-rides");
+      const summaryEl = document.getElementById("summary");
+
+      const qPending = query(collection(db, "rides"), where("status", "==", "pending"));
+      onSnapshot(qPending, (snapshot) => {
+        const items = snapshot.docs.map((d) => ({ id: d.id, ...d.data() }));
+        items.sort((a, b) => (a.createdAtMs || 0) - (b.createdAtMs || 0));
+        renderList(pendingDiv, items, "pending");
+      });
+
+      const qMine = query(collection(db, "rides"), where("driverId", "==", user.uid));
+      onSnapshot(qMine, (snapshot) => {
+        const all = snapshot.docs.map((d) => ({ id: d.id, ...d.data() }));
+        const actives = all.filter((x) => x.status === "accepted" || x.status === "in_progress");
+        const dones = all
+          .filter((x) => x.status === "completed")
+          .sort((a, b) => (a.completedAt?.seconds || 0) - (b.completedAt?.seconds || 0));
+
+        renderList(myActiveDiv, actives, "mine");
+        renderCompleted(completedDiv, dones);
+
+        const today = new Date().toISOString().slice(0, 10);
+        const todayCount = dones.filter((x) => {
+          const t = (x.completedAt?.seconds || x.startedAt?.seconds || 0) * 1000;
+          return new Date(t).toISOString().slice(0, 10) === today;
+        }).length;
+        summaryEl.innerText = "今日完成趟數：" + todayCount;
+      });
+    }
+
+    function renderList(container, items, kind) {
+      container.innerHTML = "";
+      const title = document.createElement("div");
+      title.className = "subheader";
+      title.textContent = kind === "pending" ? "🟡 可接的待接單" : "🟢 我的進行中訂單";
+      container.appendChild(title);
+
+      if (!items.length) {
+        const empty = document.createElement("div");
+        empty.className = "ride";
+        empty.textContent = "目前沒有資料";
+        container.appendChild(empty);
+        return;
+      }
+
+      items.forEach((data) => {
+        const div = document.createElement("div");
+        div.className = "ride";
+        const statusLabel = STATUS_MAP[data.status] || data.status;
+        const isCanceled = data.status === "canceled";
+        div.style.background = isCanceled ? "#fff0f0" : "#fff";
+        div.innerHTML = `
+<b>狀態：</b>${statusLabel}<br>
+<b>電話：</b>${data.phone || ""}<br>
+<b>預約時間：</b>${data.type === "reservation" ? (data.reservationTime || "") : "立即叫車"}<br>
+<b>起點：</b>${data.from || ""}<br>
+<b>終點：</b>${data.to || ""}<br>
+<b>備註：</b>${data.note || "無"}<br>
+<div class="row-actions">
+  ${data.status === "pending" ? `<button onclick="acceptRide('${data.id}')">接單</button>` : ""}
+  ${data.status === "accepted" ? `
+    <a href="https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(data.from || "")}" target="_blank">🧭 前往起點</a><br>
+    <button onclick="startRide('${data.id}')">開始行程</button>
+  ` : ""}
+  ${data.status === "in_progress" ? `
+    <a href="https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(data.to || "")}" target="_blank">🧭 前往終點</a><br>
+    <button onclick="completeRide('${data.id}')">完成行程</button>
+  ` : ""}
+</div>
+`;
+        container.appendChild(div);
+      });
+    }
+
+    function renderCompleted(container, completed) {
+      container.innerHTML = "";
+      const title = document.createElement("div");
+      title.className = "subheader";
+      title.textContent = "📜 完成紀錄";
+      container.appendChild(title);
+
+      if (!completed.length) {
+        const empty = document.createElement("div");
+        empty.className = "ride";
+        empty.textContent = "尚無完成紀錄";
+        container.appendChild(empty);
+        return;
+      }
+
+      completed.forEach((data) => {
+        const startedAt = data.startedAt?.seconds || 0;
+        const completedAt = data.completedAt?.seconds || 0;
+        const duration = startedAt && completedAt ? Math.round((completedAt - startedAt) / 60) : "未記錄";
+        const statusLabel = STATUS_MAP[data.status] || data.status;
+
+        const div = document.createElement("div");
+        div.className = "ride";
+        div.innerHTML = `
+<b>狀態：</b>${statusLabel}<br>
+<b>電話：</b>${data.phone || ""}<br>
+<b>預約時間：</b>${data.type === "reservation" ? (data.reservationTime || "") : "立即叫車"}<br>
+<b>起點：</b>${data.from || ""}<br>
+<b>終點：</b>${data.to || ""}<br>
+<b>行駛時間：</b>${duration} 分鐘<br>
+${data.rating ? `<b>乘客評分：</b>${"⭐".repeat(Math.min(5, data.rating))}<br>` : ""}
+${data.review ? `<b>評論：</b>${data.review}<br>` : ""}
+${data.fare ? `<b>收取金額：</b>${data.fare} 元<br>` : ""}
+`;
+        container.appendChild(div);
+      });
+    }
+  </script>
+</head>
+<body>
+  <div class="container">
+    <div id="auth-choice">
+      <h2>計程車司機</h2>
+      <button onclick="showLogin()">已有帳號登入</button>
+      <button class="ghost" onclick="showRegister()">註冊新帳號</button>
+    </div>
+
+    <div id="login" style="display:none">
+      <button class="ghost" onclick="goBack()">⬅ 返回</button>
+      <h2>司機登入</h2>
+      <input id="email" placeholder="Email" />
+      <input id="password" type="password" placeholder="密碼" />
+      <button onclick="login()">登入</button>
+    </div>
+
+    <div id="register" style="display:none">
+      <button class="ghost" onclick="goBack()">⬅ 返回</button>
+      <h2>註冊新帳號</h2>
+      <input id="reg-name" placeholder="姓名" />
+      <input id="reg-email" placeholder="Email" />
+      <input id="reg-password" type="password" placeholder="設定密碼" />
+      <button onclick="register()">下一步</button>
+    </div>
+
+    <div id="plate-input" style="display:none">
+      <h3>請輸入車輛資訊</h3>
+      <input id="plate" placeholder="車牌號碼" />
+      <input id="color" placeholder="車輛顏色" />
+      <button onclick="savePlateColor()">儲存並進入</button>
+    </div>
+
+    <div id="app" style="display:none">
+      <button class="ghost" onclick="logout()">🚪 登出</button>
+      <h2>計程車司機</h2>
+      <p id="driver-name"></p>
+      <p id="plate-color" class="info"></p>
+      <p id="summary" class="info">今日完成趟數：0</p>
+
+      <div class="tabs">
+        <button class="tab-button active" onclick="showSection('active')">🚖 接單管理</button>
+        <button class="tab-button" onclick="showSection('completed')">📜 完成紀錄</button>
+      </div>
+
+      <div id="active" class="section active">
+        <div id="pending-rides">載入中...</div>
+        <div style="height:10px"></div>
+        <div id="my-active-rides">載入中...</div>
+      </div>
+      <div id="completed" class="section">
+        <div id="completed-rides">載入中...</div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function showSection(target) {
+      document.getElementById("active").style.display = target === "active" ? "block" : "none";
+      document.getElementById("completed").style.display = target === "completed" ? "block" : "none";
+      const buttons = document.querySelectorAll(".tab-button");
+      buttons.forEach((btn) => btn.classList.remove("active"));
+      (target === "active" ? buttons[0] : buttons[1]).classList.add("active");
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <title>計程車系統測試入口</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>
+    :root {
+      --ink: #1f2937;
+      --muted: #6b7280;
+      --surface: rgba(255, 255, 255, 0.88);
+      --surface-strong: #ffffff;
+      --line: rgba(15, 23, 42, 0.08);
+      --driver: #009688;
+      --rider: #ef6c00;
+      --admin: #1565c0;
+      --shadow: 0 20px 44px rgba(15, 23, 42, 0.12);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      color: var(--ink);
+      font-family: "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", sans-serif;
+      background:
+        radial-gradient(circle at top left, rgba(255, 224, 130, 0.95), transparent 28%),
+        radial-gradient(circle at top right, rgba(129, 212, 250, 0.75), transparent 24%),
+        linear-gradient(180deg, #fffdf6 0%, #fff7e6 40%, #eef5ff 100%);
+      padding: 24px;
+    }
+
+    .shell {
+      max-width: 1080px;
+      margin: 0 auto;
+    }
+
+    .hero {
+      padding: 28px;
+      border-radius: 28px;
+      background: linear-gradient(145deg, rgba(24, 34, 53, 0.96), rgba(67, 45, 0, 0.92));
+      color: #fffdf8;
+      box-shadow: var(--shadow);
+    }
+
+    .hero h1 {
+      margin: 12px 0 10px;
+      font-size: clamp(30px, 5vw, 46px);
+      line-height: 1.08;
+    }
+
+    .hero p {
+      margin: 0;
+      max-width: 720px;
+      color: rgba(255, 253, 248, 0.82);
+      line-height: 1.75;
+    }
+
+    .tag {
+      display: inline-flex;
+      align-items: center;
+      padding: 8px 12px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.12);
+      font-size: 13px;
+      letter-spacing: 0.08em;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 18px;
+      margin-top: 22px;
+    }
+
+    .card {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      padding: 22px;
+      border-radius: 24px;
+      background: var(--surface);
+      border: 1px solid var(--line);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(10px);
+    }
+
+    .accent {
+      width: 56px;
+      height: 56px;
+      border-radius: 18px;
+    }
+
+    .card h2 {
+      margin: 0;
+      font-size: 24px;
+    }
+
+    .card p {
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.7;
+    }
+
+    .actions {
+      display: flex;
+      gap: 10px;
+      margin-top: auto;
+      flex-wrap: wrap;
+    }
+
+    a.button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 130px;
+      padding: 12px 16px;
+      border-radius: 14px;
+      color: #fff;
+      text-decoration: none;
+      font-weight: 700;
+    }
+
+    a.secondary {
+      background: var(--surface-strong);
+      color: var(--ink);
+      border: 1px solid var(--line);
+    }
+
+    .driver .accent,
+    .driver a.button { background: var(--driver); }
+
+    .rider .accent,
+    .rider a.button { background: var(--rider); }
+
+    .admin .accent,
+    .admin a.button { background: var(--admin); }
+
+    .note {
+      margin-top: 18px;
+      padding: 16px 18px;
+      border-radius: 18px;
+      background: rgba(255, 255, 255, 0.72);
+      border: 1px solid var(--line);
+      color: var(--muted);
+      line-height: 1.7;
+    }
+
+    code {
+      padding: 2px 6px;
+      border-radius: 8px;
+      background: rgba(15, 23, 42, 0.06);
+      color: var(--ink);
+    }
+
+    @media (max-width: 900px) {
+      .grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <main class="shell">
+    <section class="hero">
+      <div class="tag">Taxi Demo Launcher</div>
+      <h1>計程車系統測試入口</h1>
+      <p>從同一個網址進來後，直接選擇要查看的角色頁面。你修改原始 HTML 檔並存檔後，切回瀏覽器重新整理即可看到最新內容。</p>
+    </section>
+
+    <section class="grid">
+      <article class="card driver">
+        <div class="accent"></div>
+        <h2>司機端</h2>
+        <p>查看司機登入、接單、行程狀態與車牌資料設定流程。</p>
+        <div class="actions">
+          <a class="button" href="./%E8%A8%88%E7%A8%8B%E8%BB%8A%E5%8F%B8%E6%A9%9F%E7%AB%AF.html">開啟頁面</a>
+        </div>
+      </article>
+
+      <article class="card rider">
+        <div class="accent"></div>
+        <h2>乘客端</h2>
+        <p>查看叫車、訂單狀態、歷史紀錄與乘客操作畫面。</p>
+        <div class="actions">
+          <a class="button" href="./%E8%A8%88%E7%A8%8B%E8%BB%8A%E4%B9%98%E5%AE%A2%E7%AB%AF.html">開啟頁面</a>
+        </div>
+      </article>
+
+      <article class="card admin">
+        <div class="accent"></div>
+        <h2>管理後台</h2>
+        <p>查看派單、司機管理、訂單資料與後台監控畫面。</p>
+        <div class="actions">
+          <a class="button" href="./%E8%A8%88%E7%A8%8B%E8%BB%8A%E5%BE%8C%E5%8F%B0.html">開啟頁面</a>
+        </div>
+      </article>
+    </section>
+
+    <section class="note">
+      入口網址：<code>http://localhost:8000/</code><br />
+      如果你要更快切換，也可以直接開 <code>index.html</code> 作為首頁。
+    </section>
+  </main>
+</body>
+</html>
